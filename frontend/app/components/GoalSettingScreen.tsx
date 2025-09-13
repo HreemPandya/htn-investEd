@@ -38,52 +38,16 @@ const GoalSettingScreen = ({ userData, onNext }: GoalSettingScreenProps) => {
       description: "Get the freedom to go anywhere",
       suggestedAmount: 15000,
       timeline: "24 months",
-      color: "bg-blue-50 text-rbc-blue border-blue-200",
+      color: "bg-blue-50 text-blue-600 border-blue-200",
     },
     {
-      id: "trip",
-      name: "Dream Trip",
-      icon: "✈️",
-      description: "Europe backpacking, Japan adventure...",
-      suggestedAmount: 4000,
-      timeline: "18 months",
-      color: "bg-green-50 text-growth-green border-green-200",
-    },
-    {
-      id: "laptop",
-      name: "New Laptop",
-      icon: "💻",
-      description: "MacBook, gaming rig, or work setup",
-      suggestedAmount: 2000,
-      timeline: "8 months",
-      color: "bg-purple-50 text-purple-600 border-purple-200",
-    },
-    {
-      id: "emergency",
-      name: "Emergency Fund",
-      icon: "🛡️",
-      description: "Peace of mind for unexpected expenses",
-      suggestedAmount: 3000,
-      timeline: "12 months",
-      color: "bg-orange-50 text-orange-600 border-orange-200",
-    },
-    {
-      id: "graduation",
-      name: "Graduation Celebration",
-      icon: "🎓",
-      description: "Party, formal wear, memories",
-      suggestedAmount: 1500,
-      timeline: "36 months",
-      color: "bg-pink-50 text-pink-600 border-pink-200",
-    },
-    {
-      id: "apartment",
-      name: "First Apartment",
+      id: "house",
+      name: "First House",
       icon: "🏠",
-      description: "Deposit, furniture, independence",
-      suggestedAmount: 8000,
-      timeline: "24 months",
-      color: "bg-indigo-50 text-indigo-600 border-indigo-200",
+      description: "Down payment for your dream home",
+      suggestedAmount: 50000,
+      timeline: "60 months",
+      color: "bg-green-50 text-green-600 border-green-200",
     },
   ]
 
@@ -137,18 +101,35 @@ const GoalSettingScreen = ({ userData, onNext }: GoalSettingScreenProps) => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-rbc-blue to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-3xl">🧙‍♂️</span>
+          {/* Speech Bubble */}
+          <div className="relative mb-6">
+            <div 
+              className="rounded-3xl p-6 mx-auto max-w-sm relative"
+              style={{ backgroundColor: '#FFDBAC' }}
+            >
+              <p className="text-lg font-semibold" style={{ color: '#23231A' }}>
+                As a financially responsible student, what goals are you aiming for?
+              </p>
+              {/* Speech bubble tail */}
+              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
+                <div 
+                  className="w-6 h-6 transform rotate-45"
+                  style={{ backgroundColor: '#FFDBAC' }}
+                />
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-blue-100 relative mb-6 max-w-md mx-auto">
-            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-l border-t border-blue-100 rotate-45"></div>
-            <p className="text-sm text-gray-700">
-              <span className="font-bold text-rbc-blue">Portfolius:</span> "As a financially responsible student, what
-              goals are you aiming for?"
-            </p>
+
+          <div className="w-32 h-32 mx-auto mb-6 relative">
+            <img 
+              src="/images/wizard-point.png" 
+              alt="Portfolius the Wizard"
+              className="w-full h-full object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">What are your goals?</h1>
-          <p className="text-gray-600 text-lg text-balance">
+
+          <h1 className="text-3xl font-bold mb-2" style={{ color: '#23231A' }}>What are your goals?</h1>
+          <p className="text-lg text-balance" style={{ color: '#91918D' }}>
             Let's identify what you're working towards. Pick the goals that matter most to you!
           </p>
         </div>
@@ -162,27 +143,36 @@ const GoalSettingScreen = ({ userData, onNext }: GoalSettingScreenProps) => {
               <div
                 key={goal.id}
                 onClick={() => handleGoalSelect(goal)}
-                className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
+                className={`relative p-8 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
                   isSelected
-                    ? `${goal.color} border-current shadow-lg scale-105`
+                    ? "shadow-lg scale-105"
                     : "bg-white border-gray-200 hover:border-gray-300"
                 }`}
+                style={isSelected ? {
+                  backgroundColor: goal.id === 'car' ? '#EFF6FF' : '#F0FDF4',
+                  borderColor: goal.id === 'car' ? '#3B82F6' : '#22C55E'
+                } : {}}
               >
                 {/* Selection Indicator */}
                 {isSelected && (
-                  <div className="absolute top-3 right-3 w-7 h-7 bg-current rounded-full flex items-center justify-center shadow-sm">
+                  <div 
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
+                    style={{ 
+                      backgroundColor: goal.id === 'car' ? '#3B82F6' : '#22C55E'
+                    }}
+                  >
                     <span className="text-white text-sm font-bold">✓</span>
                   </div>
                 )}
 
                 <div className="text-center">
-                  <div className="text-4xl mb-3">{goal.icon}</div>
-                  <h3 className="font-semibold text-lg mb-2">{goal.name}</h3>
-                  <p className="text-sm text-gray-600 mb-3 text-balance">{goal.description}</p>
+                  <div className="text-5xl mb-4">{goal.icon}</div>
+                  <h3 className="font-semibold text-xl mb-3" style={{ color: '#23231A' }}>{goal.name}</h3>
+                  <p className="text-base mb-4 text-balance" style={{ color: '#91918D' }}>{goal.description}</p>
 
-                  <div className="space-y-1">
-                    <div className="text-sm font-bold">${goal.suggestedAmount.toLocaleString()}</div>
-                    <div className="text-xs text-gray-500">Target: {goal.timeline}</div>
+                  <div className="space-y-2">
+                    <div className="text-lg font-bold" style={{ color: '#23231A' }}>${goal.suggestedAmount.toLocaleString()}</div>
+                    <div className="text-sm" style={{ color: '#91918D' }}>Target: {goal.timeline}</div>
                   </div>
                 </div>
               </div>
@@ -192,12 +182,24 @@ const GoalSettingScreen = ({ userData, onNext }: GoalSettingScreenProps) => {
           {/* Add Custom Goal Card */}
           <div
             onClick={() => setShowCustomForm(true)}
-            className="p-6 rounded-xl border-2 border-dashed border-gray-300 cursor-pointer transition-all duration-200 hover:border-rbc-blue hover:bg-blue-50 flex items-center justify-center"
+            className="p-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 flex items-center justify-center"
+            style={{ 
+              borderColor: '#91918D',
+              backgroundColor: '#F9FAFB'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#005DAA'
+              e.currentTarget.style.backgroundColor = '#F0F9FF'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#91918D'
+              e.currentTarget.style.backgroundColor = '#F9FAFB'
+            }}
           >
             <div className="text-center">
-              <div className="text-4xl mb-3">➕</div>
-              <h3 className="font-semibold text-gray-600">Add Custom Goal</h3>
-              <p className="text-sm text-gray-500 mt-1">Something else in mind?</p>
+              <div className="text-5xl mb-4">➕</div>
+              <h3 className="font-semibold text-xl mb-2" style={{ color: '#23231A' }}>Add Custom Goal</h3>
+              <p className="text-base" style={{ color: '#91918D' }}>Something else in mind?</p>
             </div>
           </div>
         </div>
@@ -205,54 +207,85 @@ const GoalSettingScreen = ({ userData, onNext }: GoalSettingScreenProps) => {
         {/* Custom Goal Form Modal */}
         {showCustomForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 max-w-md w-full">
-              <h3 className="text-xl font-bold mb-4">Add Your Custom Goal</h3>
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+              <h3 className="text-2xl font-bold mb-6" style={{ color: '#23231A' }}>Add Your Custom Goal</h3>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Goal Name</label>
+                  <label className="block text-lg font-semibold mb-3" style={{ color: '#23231A' }}>Goal Name</label>
                   <input
                     type="text"
                     value={customGoal.name}
                     onChange={(e) => setCustomGoal({ ...customGoal, name: e.target.value })}
                     placeholder="e.g., Gaming Setup, Study Abroad..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-rbc-blue focus:border-rbc-blue transition-colors"
+                    className="w-full px-6 py-4 rounded-2xl text-lg font-medium transition-colors"
+                    style={{ 
+                      backgroundColor: '#F3F4F6',
+                      color: '#23231A',
+                      border: 'none',
+                      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Target Amount ($)</label>
+                  <label className="block text-lg font-semibold mb-3" style={{ color: '#23231A' }}>Target Amount ($)</label>
                   <input
                     type="number"
                     value={customGoal.amount}
                     onChange={(e) => setCustomGoal({ ...customGoal, amount: e.target.value })}
                     placeholder="5000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-rbc-blue focus:border-rbc-blue transition-colors"
+                    className="w-full px-6 py-4 rounded-2xl text-lg font-medium transition-colors"
+                    style={{ 
+                      backgroundColor: '#F3F4F6',
+                      color: '#23231A',
+                      border: 'none',
+                      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Timeline (months)</label>
+                  <label className="block text-lg font-semibold mb-3" style={{ color: '#23231A' }}>Timeline (months)</label>
                   <input
                     type="number"
                     value={customGoal.timeline}
                     onChange={(e) => setCustomGoal({ ...customGoal, timeline: e.target.value })}
                     placeholder="12"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-rbc-blue focus:border-rbc-blue transition-colors"
+                    className="w-full px-6 py-4 rounded-2xl text-lg font-medium transition-colors"
+                    style={{ 
+                      backgroundColor: '#F3F4F6',
+                      color: '#23231A',
+                      border: 'none',
+                      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                    }}
                   />
                 </div>
               </div>
 
-              <div className="flex space-x-3 mt-6">
+              <div className="flex space-x-4 mt-8">
                 <button
                   onClick={() => setShowCustomForm(false)}
-                  className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-6 py-4 font-semibold text-lg rounded-2xl transition-colors"
+                  style={{ 
+                    backgroundColor: '#F3F4F6',
+                    color: '#23231A',
+                    border: 'none',
+                    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                  }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCustomGoalSubmit}
-                  className="flex-1 px-4 py-2 bg-rbc-blue text-white rounded-xl hover:bg-blue-800 transition-colors"
+                  className="flex-1 px-6 py-4 font-semibold text-lg rounded-2xl transition-colors"
+                  style={{ 
+                    backgroundColor: '#005DAA',
+                    color: 'white',
+                    border: 'none',
+                    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                    letterSpacing: '0.5px'
+                  }}
                 >
                   Add Goal
                 </button>

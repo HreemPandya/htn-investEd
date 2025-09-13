@@ -6,16 +6,47 @@ interface UserData {
   hasRBCAccount?: boolean
   name?: string
   accountType?: string
-  goals: Array<{
+  university?: string
+  program?: string
+  year?: string
+  monthlyIncome?: string
+  livingArrangement?: string
+  goals?: Array<{
     id: string
     name: string
     icon: string
+    description: string
     suggestedAmount: number
     timeline: string
+    color: string
+    priority?: number
+    isCustom?: boolean
   }>
-  monthlyIncome: string
-  program?: string
-  [key: string]: any
+  selectedTier?: {
+    id: string
+    name: string
+    subtitle: string
+    monthlyAmount: number
+    commitment: string
+    features: string[]
+    pros: string[]
+    cons: string[]
+    recommended: boolean
+    color: string
+    badge: string
+  }
+  spendingAnalysis?: {
+    monthlySpending: number
+    categories: {
+      food: number
+      entertainment: number
+      transport: number
+      shopping: number
+      other: number
+    }
+    savingsRate: number
+    riskProfile: string
+  }
 }
 
 interface SpendingData {
@@ -60,7 +91,7 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
     setTimeout(() => {
       // Mock spending analysis based on user data
       const mockSpendingData = {
-        monthlySpending: Math.max(800, Number.parseInt(userData.monthlyIncome) * 0.6),
+        monthlySpending: Math.max(800, Number.parseInt(userData.monthlyIncome || "1000") * 0.6),
         categories: {
           food: 0.35,
           entertainment: 0.25,
@@ -70,7 +101,7 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
         },
         savingsRate: Math.max(
           0.1,
-          Math.min(0.4, (Number.parseInt(userData.monthlyIncome) - 800) / Number.parseInt(userData.monthlyIncome)),
+          Math.min(0.4, (Number.parseInt(userData.monthlyIncome || "1000") - 800) / Number.parseInt(userData.monthlyIncome || "1000")),
         ),
         riskProfile:
           userData.program === "Computer Science"
@@ -88,10 +119,10 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
   const calculateTierRecommendations = () => {
     if (!spendingData) return []
 
-    const availableAmount = Number.parseInt(userData.monthlyIncome) - spendingData.monthlySpending
-    const totalGoalAmount = userData.goals.reduce((sum: number, goal: any) => sum + goal.suggestedAmount, 0)
+    const availableAmount = Number.parseInt(userData.monthlyIncome || "1000") - spendingData.monthlySpending
+    const totalGoalAmount = (userData.goals || []).reduce((sum: number, goal: any) => sum + goal.suggestedAmount, 0)
     const averageTimeline =
-      userData.goals.reduce((sum: number, goal: any) => sum + Number.parseInt(goal.timeline), 0) / userData.goals.length
+      (userData.goals || []).reduce((sum: number, goal: any) => sum + Number.parseInt(goal.timeline), 0) / (userData.goals?.length || 1)
 
     return [
       {
@@ -163,35 +194,35 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
       onNext("dashboard", {
         ...userData,
         selectedTier,
-        spendingAnalysis: spendingData,
+        spendingAnalysis: spendingData || undefined,
       })
     }
   }
 
   if (isAnalyzing) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-rbc-blue to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse shadow-lg">
-            <span className="text-3xl">🧙‍♂️</span>
+          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse shadow-lg" style={{ background: 'linear-gradient(135deg, #005DAA 0%, #3B82F6 100%)' }}>
+            <span className="text-4xl">🧙‍♂️</span>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-blue-100 relative mb-6 max-w-md mx-auto">
-            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-l border-t border-blue-100 rotate-45"></div>
-            <p className="text-sm text-gray-700">
-              <span className="font-bold text-rbc-blue">Portfolius:</span> "Here's a suggestion based on your habits.
+          <div className="rounded-2xl p-6 shadow-sm relative mb-8 max-w-md mx-auto" style={{ backgroundColor: '#FFDBAC' }}>
+            <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-6 h-6 rotate-45" style={{ backgroundColor: '#FFDBAC' }}></div>
+            <p className="text-lg font-semibold" style={{ color: '#23231A' }}>
+              <span className="font-bold" style={{ color: '#005DAA' }}>Portfolius:</span> "Here's a suggestion based on your habits.
               Pick what works for you."
             </p>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Analyzing your spending habits...</h2>
-          <p className="text-gray-600 mb-6">Our AI is reviewing your goals and creating personalized recommendations</p>
+          <h2 className="text-3xl font-bold mb-3" style={{ color: '#23231A' }}>Analyzing your spending habits...</h2>
+          <p className="text-lg mb-8" style={{ color: '#91918D' }}>Our AI is reviewing your goals and creating personalized recommendations</p>
 
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-3 h-3 bg-rbc-blue rounded-full animate-bounce"></div>
-            <div className="w-3 h-3 bg-rbc-blue rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-            <div className="w-3 h-3 bg-rbc-blue rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+          <div className="flex items-center justify-center space-x-3">
+            <div className="w-4 h-4 rounded-full animate-bounce" style={{ backgroundColor: '#005DAA' }}></div>
+            <div className="w-4 h-4 rounded-full animate-bounce" style={{ backgroundColor: '#005DAA', animationDelay: "0.1s" }}></div>
+            <div className="w-4 h-4 rounded-full animate-bounce" style={{ backgroundColor: '#005DAA', animationDelay: "0.2s" }}></div>
           </div>
 
-          <div className="mt-6 text-sm text-gray-500 space-y-1">
+          <div className="mt-8 text-base space-y-2" style={{ color: '#91918D' }}>
             <p>✓ Analyzing past month spending patterns</p>
             <p>✓ Calculating goal timelines</p>
             <p>✓ Assessing risk tolerance</p>
@@ -203,49 +234,83 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-growth-green to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-3xl">📊</span>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="p-6 flex justify-center items-center">
+        <img 
+          src="/images/investEd-logo.png" 
+          alt="InvestEd Logo"
+          className="h-24 w-auto object-contain"
+        />
+      </div>
+
+      <div className="px-6 pb-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Wizard Section */}
+          <div className="text-center mb-8">
+          {/* Speech Bubble */}
+          <div className="relative mb-6">
+            <div 
+              className="rounded-3xl p-6 mx-auto max-w-sm relative"
+              style={{ backgroundColor: '#FFDBAC' }}
+            >
+              <p className="text-lg font-semibold" style={{ color: '#23231A' }}>
+                Based on your goals and spending, I've prepared some investment recommendations for you!
+              </p>
+              {/* Speech bubble tail */}
+              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
+                <div 
+                  className="w-6 h-6 transform rotate-45"
+                  style={{ backgroundColor: '#FFDBAC' }}
+                />
+              </div>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Recommended Tier Plans</h1>
-          <p className="text-gray-600 text-lg text-balance">
-            Based on your spending habits and goals, here are your personalized savings tiers!
+
+          <div className="w-32 h-32 mx-auto mb-6 relative">
+            <img 
+              src="/images/wizard-charcter.png" 
+              alt="Portfolius the Wizard"
+              className="w-full h-full object-contain"
+            />
+          </div>
+
+          <h1 className="text-3xl font-bold mb-2" style={{ color: '#23231A' }}>Investment Recommendations</h1>
+          <p className="text-lg text-balance" style={{ color: '#91918D' }}>
+            Choose the investment plan that best fits your financial situation and goals
           </p>
         </div>
 
         {/* Spending Insights Summary */}
         <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
-          <h3 className="font-semibold text-lg mb-4">📈 Your Spending Analysis</h3>
-          <div className="grid md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-rbc-blue/5 rounded-xl">
-              <div className="text-2xl font-bold text-rbc-blue">${spendingData?.monthlySpending.toLocaleString()}</div>
-              <div className="text-sm text-gray-600">Monthly Spending</div>
+          <h3 className="font-bold text-2xl mb-6" style={{ color: '#23231A' }}>📈 Your Spending Analysis</h3>
+          <div className="grid md:grid-cols-4 gap-6">
+            <div className="text-center p-6 rounded-2xl bg-white shadow-sm">
+              <div className="text-3xl font-bold mb-2" style={{ color: '#005DAA' }}>${spendingData?.monthlySpending.toLocaleString()}</div>
+              <div className="text-base" style={{ color: '#91918D' }}>Monthly Spending</div>
             </div>
 
-            <div className="text-center p-4 bg-growth-green/5 rounded-xl">
-              <div className="text-2xl font-bold text-growth-green">{Math.round((spendingData?.savingsRate || 0) * 100)}%</div>
-              <div className="text-sm text-gray-600">Savings Rate</div>
+            <div className="text-center p-6 rounded-2xl bg-white shadow-sm">
+              <div className="text-3xl font-bold mb-2" style={{ color: '#10B981' }}>{Math.round((spendingData?.savingsRate || 0) * 100)}%</div>
+              <div className="text-base" style={{ color: '#91918D' }}>Savings Rate</div>
             </div>
 
-            <div className="text-center p-4 bg-warm-yellow/10 rounded-xl">
-              <div className="text-2xl font-bold text-yellow-600">
-                ${Math.max(0, Number.parseInt(userData.monthlyIncome) - (spendingData?.monthlySpending || 0)).toLocaleString()}
+            <div className="text-center p-6 rounded-2xl bg-white shadow-sm">
+              <div className="text-3xl font-bold mb-2" style={{ color: '#F59E0B' }}>
+                ${Math.max(0, Number.parseInt(userData.monthlyIncome || "1000") - (spendingData?.monthlySpending || 0)).toLocaleString()}
               </div>
-              <div className="text-sm text-gray-600">Available Monthly</div>
+              <div className="text-base" style={{ color: '#91918D' }}>Available Monthly</div>
             </div>
 
-            <div className="text-center p-4 bg-purple-50 rounded-xl">
-              <div className="text-2xl font-bold text-purple-600 capitalize">{spendingData?.riskProfile}</div>
-              <div className="text-sm text-gray-600">Risk Profile</div>
+            <div className="text-center p-6 rounded-2xl bg-white shadow-sm">
+              <div className="text-3xl font-bold mb-2 capitalize" style={{ color: '#8B5CF6' }}>{spendingData?.riskProfile}</div>
+              <div className="text-base" style={{ color: '#91918D' }}>Risk Profile</div>
             </div>
           </div>
         </div>
 
         {/* Tier Cards */}
-        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid lg:grid-cols-3 gap-8 mb-8">
           {tiers.map((tier) => {
             const isSelected = selectedTier?.id === tier.id
 
@@ -254,46 +319,58 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
                 key={tier.id}
                 onClick={() => handleTierSelect(tier)}
                 className={`relative cursor-pointer transition-all duration-300 transform hover:scale-105 ${
-                  isSelected ? "ring-4 ring-rbc-blue/30" : ""
+                  isSelected ? "ring-4" : ""
                 }`}
+                style={{ 
+                  '--tw-ring-color': isSelected ? '#005DAA' : 'transparent',
+                  '--tw-ring-opacity': isSelected ? 0.3 : 0
+                } as React.CSSProperties}
               >
                 <div
-                  className={`p-6 rounded-xl border-2 ${tier.color} ${
+                  className={`p-8 rounded-2xl border-2 bg-white ${
                     isSelected ? "shadow-xl" : "shadow-sm hover:shadow-lg"
                   }`}
+                  style={{ 
+                    borderColor: isSelected ? '#005DAA' : '#E5E7EB'
+                  }}
                 >
                   {/* Badge */}
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="px-3 py-1 bg-current text-white text-xs font-bold rounded-full">{tier.badge}</span>
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span 
+                      className="px-4 py-2 text-white text-sm font-bold rounded-full"
+                      style={{ backgroundColor: '#005DAA' }}
+                    >
+                      {tier.badge}
+                    </span>
                   </div>
 
                   {/* Header */}
-                  <div className="text-center mb-6 mt-4">
-                    <h3 className="text-xl font-bold mb-1">{tier.name}</h3>
-                    <p className="text-sm opacity-80">{tier.subtitle}</p>
-                    <div className="mt-3">
-                      <div className="text-3xl font-bold">${tier.monthlyAmount}</div>
-                      <div className="text-sm opacity-80">per month</div>
+                  <div className="text-center mb-8 mt-6">
+                    <h3 className="text-2xl font-bold mb-2" style={{ color: '#23231A' }}>{tier.name}</h3>
+                    <p className="text-base mb-4" style={{ color: '#91918D' }}>{tier.subtitle}</p>
+                    <div className="mt-4">
+                      <div className="text-4xl font-bold mb-1" style={{ color: '#005DAA' }}>${tier.monthlyAmount}</div>
+                      <div className="text-base" style={{ color: '#91918D' }}>per month</div>
                     </div>
                   </div>
 
                   {/* Features */}
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-4 mb-8">
                     {tier.features.map((feature, index) => (
-                      <div key={index} className="flex items-start space-x-2">
-                        <span className="text-current mt-1">•</span>
-                        <span className="text-sm">{feature}</span>
+                      <div key={index} className="flex items-start space-x-3">
+                        <span className="text-lg mt-1" style={{ color: '#005DAA' }}>•</span>
+                        <span className="text-base" style={{ color: '#23231A' }}>{feature}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Pros & Cons */}
-                  <div className="grid grid-cols-1 gap-3 text-xs">
+                  <div className="grid grid-cols-1 gap-4 text-sm">
                     <div>
-                      <div className="font-semibold mb-1">✅ Pros:</div>
-                      <ul className="space-y-1">
+                      <div className="font-semibold mb-2" style={{ color: '#10B981' }}>✅ Pros:</div>
+                      <ul className="space-y-2">
                         {tier.pros.map((pro, index) => (
-                          <li key={index} className="opacity-80">
+                          <li key={index} style={{ color: '#91918D' }}>
                             • {pro}
                           </li>
                         ))}
@@ -301,10 +378,10 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
                     </div>
 
                     <div>
-                      <div className="font-semibold mb-1">⚠️ Considerations:</div>
-                      <ul className="space-y-1">
+                      <div className="font-semibold mb-2" style={{ color: '#F59E0B' }}>⚠️ Considerations:</div>
+                      <ul className="space-y-2">
                         {tier.cons.map((con, index) => (
-                          <li key={index} className="opacity-80">
+                          <li key={index} style={{ color: '#91918D' }}>
                             • {con}
                           </li>
                         ))}
@@ -314,8 +391,8 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
 
                   {/* Selection Indicator */}
                   {isSelected && (
-                    <div className="absolute top-3 right-3 w-8 h-8 bg-rbc-blue rounded-full flex items-center justify-center shadow-sm">
-                      <span className="text-white text-sm font-bold">✓</span>
+                    <div className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center shadow-sm" style={{ backgroundColor: '#005DAA' }}>
+                      <span className="text-white text-lg font-bold">✓</span>
                     </div>
                   )}
                 </div>
@@ -329,9 +406,9 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
           <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
             <h3 className="font-semibold text-lg mb-4">🎯 Goal Achievement Timeline</h3>
             <div className="space-y-4">
-              {userData.goals.map((goal: any, index: number) => {
+              {(userData.goals || []).map((goal: any, index: number) => {
                 const monthsNeeded = Math.ceil(
-                  goal.suggestedAmount / (selectedTier.monthlyAmount / userData.goals.length),
+                  goal.suggestedAmount / (selectedTier.monthlyAmount / (userData.goals?.length || 1)),
                 )
                 const achievableDate = new Date()
                 achievableDate.setMonth(achievableDate.getMonth() + monthsNeeded)
@@ -364,10 +441,16 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
           <button
             onClick={handleNext}
             disabled={!selectedTier}
-            className="px-8 py-3 bg-rbc-blue text-white font-semibold rounded-xl hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
+            className="px-12 py-4 text-white font-semibold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg text-lg"
+            style={{ 
+              backgroundColor: selectedTier ? '#005DAA' : '#91918D',
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+              letterSpacing: '0.5px'
+            }}
           >
             Continue with {selectedTier?.name || "Selected Plan"}
           </button>
+        </div>
         </div>
       </div>
     </div>

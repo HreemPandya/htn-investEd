@@ -6,6 +6,7 @@ import PersonalizationScreen from "./components/PersonalizationScreen"
 import GoalSettingScreen from "./components/GoalSettingScreen"
 import RecommendationsScreen from "./components/RecommendationsScreen"
 import InsightsDashboard from "./components/InsightsDashboard"
+import AnalyticsDashboard from "./components/AnalyticsDashboard"
 
 interface UserData {
   hasRBCAccount?: boolean
@@ -138,7 +139,10 @@ export default function Home() {
         return <RecommendationsScreen userData={userData} onNext={handleNavigation} />
 
       case "dashboard":
-        return <InsightsDashboard userData={userData} />
+        return <InsightsDashboard userData={userData} onNext={handleNavigation} />
+
+      case "analytics":
+        return <AnalyticsDashboard userData={userData} onNext={handleNavigation} />
 
       case "demo":
         return <DemoMode onNext={handleNavigation} />

@@ -37,17 +37,8 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
         {/* Wizard Character */}
         <div className="text-center mb-8">
-          {/* Wizard Image - Made HUGE */}
-          <div className="w-64 h-64 mx-auto mb-6 relative">
-            <img 
-              src="/images/wizard-charcter.png" 
-              alt="Portfolius the Wizard"
-              className="w-full h-full object-contain"
-            />
-          </div>
-          
           {/* Speech Bubble */}
-          <div className="relative mb-8">
+          <div className="relative mb-6">
             <div 
               className="rounded-3xl p-6 mx-auto max-w-sm relative"
               style={{ backgroundColor: '#FFDBAC' }}
@@ -63,6 +54,15 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Wizard Image - Made HUGE */}
+          <div className="w-64 h-64 mx-auto relative">
+            <img 
+              src="/images/wizard-charcter.png" 
+              alt="Portfolius the Wizard"
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
 

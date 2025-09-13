@@ -32,9 +32,10 @@ interface Video {
 
 interface InsightsDashboardProps {
   userData: UserData
+  onNext?: (screen: string, data?: any) => void
 }
 
-const InsightsDashboard = ({ userData }: InsightsDashboardProps) => {
+const InsightsDashboard = ({ userData, onNext }: InsightsDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview")
   const [showVideo, setShowVideo] = useState<Video | null>(null)
 
@@ -89,39 +90,42 @@ const InsightsDashboard = ({ userData }: InsightsDashboardProps) => {
   ]
 
   const renderOverviewTab = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Goals Progress */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h3 className="text-xl font-semibold mb-4">🎯 Goals Progress</h3>
-        <div className="space-y-4">
+      <div className="rounded-2xl p-8 shadow-sm" style={{ backgroundColor: '#F9FAFB' }}>
+        <h3 className="text-2xl font-bold mb-6" style={{ color: '#23231A' }}>🎯 Goals Progress</h3>
+        <div className="space-y-6">
           {userData.goals?.map((goal: any, index: number) => {
             const progress = Math.random() * 40 // Mock progress
             const monthsElapsed = 3 // Mock elapsed time
             const totalMonths = Number.parseInt(goal.timeline)
 
             return (
-              <div key={goal.id} className="border border-gray-200 rounded-xl p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xl">{goal.icon}</span>
-                    <span className="font-medium">{goal.name}</span>
+              <div key={goal.id} className="rounded-2xl p-6 bg-white shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-3xl">{goal.icon}</span>
+                    <span className="font-semibold text-xl" style={{ color: '#23231A' }}>{goal.name}</span>
                   </div>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-lg font-medium" style={{ color: '#005DAA' }}>
                     ${Math.round((goal.suggestedAmount * progress) / 100).toLocaleString()} / $
                     {goal.suggestedAmount.toLocaleString()}
                   </span>
                 </div>
 
-                <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                <div className="w-full rounded-full h-3 mb-4" style={{ backgroundColor: '#E5E7EB' }}>
                   <div
-                    className="bg-gradient-to-r from-rbc-blue to-growth-green h-3 rounded-full transition-all duration-500"
-                    style={{ width: `${progress}%` }}
+                    className="h-3 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${progress}%`,
+                      background: 'linear-gradient(90deg, #005DAA 0%, #3B82F6 100%)'
+                    }}
                   />
                 </div>
 
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>{progress.toFixed(1)}% complete</span>
-                  <span>{totalMonths - monthsElapsed} months remaining</span>
+                <div className="flex justify-between text-base">
+                  <span style={{ color: '#91918D' }}>{progress.toFixed(1)}% complete</span>
+                  <span style={{ color: '#91918D' }}>{totalMonths - monthsElapsed} months remaining</span>
                 </div>
               </div>
             )
@@ -130,28 +134,28 @@ const InsightsDashboard = ({ userData }: InsightsDashboardProps) => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-          <div className="text-3xl font-bold text-growth-green mb-2">${userData.selectedTier?.monthlyAmount || 0}</div>
-          <div className="text-gray-600">Monthly Investment</div>
-          <div className="text-sm text-growth-green mt-1">+12% from last month</div>
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="rounded-2xl p-8 shadow-sm text-center bg-white">
+          <div className="text-4xl font-bold mb-3" style={{ color: '#10B981' }}>${userData.selectedTier?.monthlyAmount || 0}</div>
+          <div className="text-lg mb-2" style={{ color: '#23231A' }}>Monthly Investment</div>
+          <div className="text-base" style={{ color: '#10B981' }}>+12% from last month</div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-          <div className="text-3xl font-bold text-rbc-blue mb-2">{userData.goals?.length || 0}</div>
-          <div className="text-gray-600">Active Goals</div>
-          <div className="text-sm text-rbc-blue mt-1">On track</div>
+        <div className="rounded-2xl p-8 shadow-sm text-center bg-white">
+          <div className="text-4xl font-bold mb-3" style={{ color: '#005DAA' }}>{userData.goals?.length || 0}</div>
+          <div className="text-lg mb-2" style={{ color: '#23231A' }}>Active Goals</div>
+          <div className="text-base" style={{ color: '#10B981' }}>On track</div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-          <div className="text-3xl font-bold text-purple-600 mb-2">
+        <div className="rounded-2xl p-8 shadow-sm text-center bg-white">
+          <div className="text-4xl font-bold mb-3" style={{ color: '#F59E0B' }}>
             {Math.round(
               ((userData.selectedTier?.monthlyAmount || 0) / Number.parseInt(userData.monthlyIncome || "1000")) * 100,
             )}
             %
           </div>
-          <div className="text-gray-600">Savings Rate</div>
-          <div className="text-sm text-purple-600 mt-1">Above average</div>
+          <div className="text-lg mb-2" style={{ color: '#23231A' }}>Savings Rate</div>
+          <div className="text-base" style={{ color: '#10B981' }}>Above average</div>
         </div>
       </div>
     </div>
@@ -310,48 +314,72 @@ const InsightsDashboard = ({ userData }: InsightsDashboardProps) => {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-white">
         {/* Header */}
-        <div className="bg-gradient-to-r from-rbc-blue to-blue-700 rounded-xl p-6 text-white mb-6 relative overflow-hidden">
-          <div className="absolute top-4 right-4">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🧙‍♂️</span>
+      <div className="p-6 flex justify-center items-center">
+        <img 
+          src="/images/investEd-logo.png" 
+          alt="InvestEd Logo"
+          className="h-24 w-auto object-contain"
+        />
+      </div>
+
+      <div className="px-6 pb-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Welcome Card */}
+          <div className="rounded-3xl p-8 mb-8 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #005DAA 0%, #3B82F6 100%)' }}>
+            <div className="absolute top-6 right-6 flex space-x-3">
+              {onNext && (
+                <button
+                  onClick={() => onNext("analytics")}
+                  className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors backdrop-blur-sm"
+                  title="View Analytics"
+                >
+                  <span className="text-xl">📈</span>
+                </button>
+              )}
+              <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <span className="text-2xl">🧙‍♂️</span>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold mb-2">Welcome back, {userData.name}! 👋</h1>
-              <p className="opacity-90">Here's your financial overview • {userData.selectedTier?.name} Plan</p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm opacity-80">Next Goal</div>
-              <div className="font-semibold">
-                {userData.goals?.[0]?.name} in {Number.parseInt(userData.goals?.[0]?.timeline || "0") - 3} months
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold mb-3 text-white">Welcome back, {userData.name}! 👋</h1>
+                <p className="text-white/90 text-lg">Here's your financial overview • {userData.selectedTier?.name} Plan</p>
+              </div>
+              <div className="text-right">
+                <div className="text-white/80 text-sm mb-1">Next Goal</div>
+                <div className="font-bold text-white text-xl">
+                  {userData.goals?.[0]?.name} in {Number.parseInt(userData.goals?.[0]?.timeline || "0") - 3} months
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Tab Navigation */}
-        <div className="bg-white rounded-xl shadow-sm mb-6">
-          <div className="flex border-b border-gray-200">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 px-6 py-4 text-center font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? "text-rbc-blue border-b-2 border-rbc-blue"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <span className="mr-2">{tab.icon}</span>
-                {tab.name}
-              </button>
-            ))}
+          {/* Tab Navigation */}
+          <div className="rounded-2xl p-2 mb-8" style={{ backgroundColor: '#F3F4F6' }}>
+            <div className="flex">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 px-6 py-4 text-center font-semibold text-lg rounded-xl transition-all ${
+                    activeTab === tab.id
+                      ? "shadow-sm"
+                      : "hover:bg-white/50"
+                  }`}
+                  style={{
+                    backgroundColor: activeTab === tab.id ? '#005DAA' : 'transparent',
+                    color: activeTab === tab.id ? 'white' : '#23231A',
+                    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                  }}
+                >
+                  <span className="mr-2">{tab.icon}</span>
+                  {tab.name}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
         {/* Tab Content */}
         {activeTab === "overview" && renderOverviewTab()}
@@ -426,6 +454,7 @@ const InsightsDashboard = ({ userData }: InsightsDashboardProps) => {
             🔒 Your financial data is secure and encrypted •
             <span className="text-rbc-blue hover:underline cursor-pointer"> Privacy Policy</span>
           </p>
+        </div>
         </div>
       </div>
     </div>
