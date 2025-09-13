@@ -124,19 +124,23 @@ export default function Home() {
     setCurrentScreen(nextScreen)
   }
 
+  const handleBack = (previousScreen: string) => {
+    setCurrentScreen(previousScreen)
+  }
+
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case "login":
         return <LoginScreen onNext={handleNavigation} />
 
       case "personalization":
-        return <PersonalizationScreen userData={userData} onNext={handleNavigation} />
+        return <PersonalizationScreen userData={userData} onNext={handleNavigation} onBack={handleBack} />
 
       case "goals":
-        return <GoalSettingScreen userData={userData} onNext={handleNavigation} />
+        return <GoalSettingScreen userData={userData} onNext={handleNavigation} onBack={handleBack} />
 
       case "recommendations":
-        return <RecommendationsScreen userData={userData} onNext={handleNavigation} />
+        return <RecommendationsScreen userData={userData} onNext={handleNavigation} onBack={handleBack} />
 
       case "dashboard":
         return <InsightsDashboard userData={userData} onNext={handleNavigation} />
