@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* other config options */
+  allowedDevOrigins: [
+    'http://localhost:3000',
+  ],
 };
 
-export default nextConfig;
+// This is the correct way to export a Next.js configuration in a mixed JS/TS environment.
+module.exports = nextConfig;
