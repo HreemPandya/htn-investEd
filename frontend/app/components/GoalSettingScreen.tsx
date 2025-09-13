@@ -23,9 +23,10 @@ interface UserData {
 interface GoalSettingScreenProps {
   userData: UserData
   onNext: (screen: string, data?: UserData) => void
+  onBack?: (screen: string) => void
 }
 
-const GoalSettingScreen = ({ userData, onNext }: GoalSettingScreenProps) => {
+const GoalSettingScreen = ({ userData, onNext, onBack }: GoalSettingScreenProps) => {
   const [selectedGoals, setSelectedGoals] = useState<Goal[]>([])
   const [customGoal, setCustomGoal] = useState({ name: "", amount: "", timeline: "" })
   const [showCustomForm, setShowCustomForm] = useState(false)
@@ -97,10 +98,52 @@ const GoalSettingScreen = ({ userData, onNext }: GoalSettingScreenProps) => {
       : 0
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="p-6 flex justify-between items-center">
+        {onBack && (
+          <button
+            onClick={() => onBack("personalization")}
+            className="px-6 py-3 font-semibold text-lg rounded-2xl transition-colors"
+            style={{ 
+              backgroundColor: '#F3F4F6',
+              color: '#23231A',
+              border: 'none',
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+            }}
+          >
+            ← Back
+          </button>
+        )}
+        <img 
+          src="/images/investEd-logo.png" 
+          alt="InvestEd Logo"
+          className="h-24 w-auto object-contain"
+        />
+        <div className="w-24"></div> {/* Spacer for centering */}
+      </div>
+
+      {/* Progress Bar */}
+      <div className="px-6 mb-6">
+        <div className="flex justify-between text-sm mb-2" style={{ color: '#91918D' }}>
+          <span>Step 2 of 3</span>
+          <span>67%</span>
+        </div>
+        <div className="w-full rounded-full h-2" style={{ backgroundColor: '#E5E7EB' }}>
+          <div
+            className="h-2 rounded-full transition-all duration-300"
+            style={{ 
+              backgroundColor: '#005DAA',
+              width: '67%'
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="px-6 pb-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Wizard Section */}
+          <div className="text-center mb-8">
           {/* Speech Bubble */}
           <div className="relative mb-6">
             <div 
@@ -359,6 +402,7 @@ const GoalSettingScreen = ({ userData, onNext }: GoalSettingScreenProps) => {
           <p className="text-gray-500 text-sm">
             💡 Tip: Start with 1-3 goals to keep things manageable. You can always add more later!
           </p>
+        </div>
         </div>
       </div>
     </div>

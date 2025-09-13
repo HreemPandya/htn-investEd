@@ -12,9 +12,10 @@ interface UserData {
 interface PersonalizationScreenProps {
   userData: UserData
   onNext: (screen: string, data?: UserData) => void
+  onBack?: (screen: string) => void
 }
 
-const PersonalizationScreen = ({ userData, onNext }: PersonalizationScreenProps) => {
+const PersonalizationScreen = ({ userData, onNext, onBack }: PersonalizationScreenProps) => {
   const [formData, setFormData] = useState({
     name: userData.name || "",
     university: "",
@@ -170,12 +171,27 @@ const PersonalizationScreen = ({ userData, onNext }: PersonalizationScreenProps)
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <div className="p-6 flex justify-center items-center">
+      <div className="p-6 flex justify-between items-center">
+        {onBack && (
+          <button
+            onClick={() => onBack("login")}
+            className="px-6 py-3 font-semibold text-lg rounded-2xl transition-colors"
+            style={{ 
+              backgroundColor: '#F3F4F6',
+              color: '#23231A',
+              border: 'none',
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+            }}
+          >
+            ← Back
+          </button>
+        )}
         <img 
           src="/images/investEd-logo.png" 
           alt="InvestEd Logo"
           className="h-24 w-auto object-contain"
         />
+        <div className="w-24"></div> {/* Spacer for centering */}
       </div>
 
       {/* Progress Bar */}

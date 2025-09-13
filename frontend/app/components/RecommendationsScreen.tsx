@@ -79,9 +79,10 @@ interface Tier {
 interface RecommendationsScreenProps {
   userData: UserData
   onNext: (screen: string, data?: UserData) => void
+  onBack?: (screen: string) => void
 }
 
-const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps) => {
+const RecommendationsScreen = ({ userData, onNext, onBack }: RecommendationsScreenProps) => {
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(true)
   const [spendingData, setSpendingData] = useState<SpendingData | null>(null)
@@ -236,12 +237,44 @@ const RecommendationsScreen = ({ userData, onNext }: RecommendationsScreenProps)
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="p-6 flex justify-center items-center">
+      <div className="p-6 flex justify-between items-center">
+        {onBack && (
+          <button
+            onClick={() => onBack("goals")}
+            className="px-6 py-3 font-semibold text-lg rounded-2xl transition-colors"
+            style={{ 
+              backgroundColor: '#F3F4F6',
+              color: '#23231A',
+              border: 'none',
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+            }}
+          >
+            ← Back
+          </button>
+        )}
         <img 
           src="/images/investEd-logo.png" 
           alt="InvestEd Logo"
           className="h-24 w-auto object-contain"
         />
+        <div className="w-24"></div> {/* Spacer for centering */}
+      </div>
+
+      {/* Progress Bar */}
+      <div className="px-6 mb-6">
+        <div className="flex justify-between text-sm mb-2" style={{ color: '#91918D' }}>
+          <span>Step 3 of 3</span>
+          <span>100%</span>
+        </div>
+        <div className="w-full rounded-full h-2" style={{ backgroundColor: '#E5E7EB' }}>
+          <div
+            className="h-2 rounded-full transition-all duration-300"
+            style={{ 
+              backgroundColor: '#005DAA',
+              width: '100%'
+            }}
+          />
+        </div>
       </div>
 
       <div className="px-6 pb-8">
