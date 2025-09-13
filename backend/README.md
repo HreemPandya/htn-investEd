@@ -1,10 +1,10 @@
 ## Features
 
-# Transactions API → add and fetch transactions.
-# Classifier API → simple rule-based “necessary vs unnecessary” classification.
-# Insights API → aggregates user spending and generates witty insights.
-# Seeder → pre-load demo transactions for user demo.
-# SQLite persistence → all data survives restarts.
+Transactions API → add and fetch transactions.
+Classifier API → simple rule-based “necessary vs unnecessary” classification.
+Insights API → aggregates user spending and generates witty insights.
+Seeder → pre-load demo transactions for user demo.
+SQLite persistence → all data survives restarts.
 
 ## Setup
 1.Clone the repository
