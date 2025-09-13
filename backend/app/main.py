@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from app.api import transactions, insights, classify, chatbot, health
+from app.core.database import Base, engine
+from app.models.transaction_db import TransactionDB
 
+# create tables
+Base.metadata.create_all(bind=engine)
 app = FastAPI(title="RBC Insights Backend")
 
 # include routers
