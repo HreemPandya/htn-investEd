@@ -25,7 +25,8 @@ def update_job_status(job_id: str, status: str, progress: int = 0, message: str 
         "message": message,
         "updated_at": datetime.now().isoformat(),
         "video_ready": False,
-        "voiceover_ready": False
+        "voiceover_ready": False,
+        "final_video_ready": False
     }
     
     # Also save to file for persistence
@@ -67,10 +68,12 @@ async def generate_video_with_tracking(text_content: str, job_id: str):
             job_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
             video_files = list(job_dir.glob("**/*.mp4"))
             voiceover_files = list(job_dir.glob("**/*.mp3"))
+            final_video_file = job_dir / "final_video.mp4"
             
             current_status = get_job_status(job_id)
             current_status["video_ready"] = len(video_files) > 0
             current_status["voiceover_ready"] = len(voiceover_files) > 0
+            current_status["final_video_ready"] = final_video_file.exists()
             job_status_store[job_id] = current_status
             
             # Save updated status
@@ -92,6 +95,7 @@ class QuestionResponse(BaseModel):
     job_id: str
     video_url: str = None
     voiceover_url: str = None
+    final_video_url: str = None
     generation_status: str = "initiated"
     estimated_completion_time: str = None
 
@@ -142,8 +146,9 @@ Answer:"""
             question=request.question,
             answer=answer,
             job_id=job_id,
-            video_url=f"/videos/{job_id}/video.mp4",  # This will be available once video is generated
-            voiceover_url=f"/videos/{job_id}/voiceover.mp3",  # This will be available once voiceover is generated
+            video_url=f"/videos/{job_id}/FinancialHelpScene.mp4",  # Original video file
+            voiceover_url=f"/videos/{job_id}/voiceover.mp3",  # Voiceover file
+            final_video_url=f"/videos/{job_id}/final_video.mp4",  # Merged video with audio
             generation_status="initiated",
             estimated_completion_time="2-3 minutes"
         )
@@ -166,6 +171,7 @@ async def get_video_status(job_id: str):
     # Look for video files
     video_files = list(video_dir.glob("**/*.mp4"))
     voiceover_files = list(video_dir.glob("**/*.mp3"))
+    final_video_file = video_dir / "final_video.mp4"
     
     # Build comprehensive response
     response = {
@@ -176,9 +182,11 @@ async def get_video_status(job_id: str):
         "updated_at": status_info.get("updated_at", ""),
         "video_ready": status_info.get("video_ready", False),
         "voiceover_ready": status_info.get("voiceover_ready", False),
+        "final_video_ready": status_info.get("final_video_ready", False),
         "files": {
             "video": None,
-            "voiceover": None
+            "voiceover": None,
+            "final_video": None
         }
     }
     
@@ -201,6 +209,15 @@ async def get_video_status(job_id: str):
             "file_name": voiceover_path.name
         }
         response["voiceover_ready"] = True
+    
+    # Add final merged video file info if available
+    if final_video_file.exists():
+        response["files"]["final_video"] = {
+            "url": f"/videos/{job_id}/final_video.mp4",
+            "file_size": final_video_file.stat().st_size,
+            "file_name": "final_video.mp4"
+        }
+        response["final_video_ready"] = True
     
     return response
 

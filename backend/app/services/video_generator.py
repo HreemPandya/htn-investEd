@@ -10,6 +10,68 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+def merge_video_with_audio(video_path: str, audio_path: str, job_id: str, status_callback=None) -> str:
+    """
+    Merge video with audio using ffmpeg.
+    
+    Args:
+        video_path: Path to the video file
+        audio_path: Path to the audio file
+        job_id: Unique identifier for the job
+        status_callback: Optional callback function to update job status
+    
+    Returns:
+        Path to the merged video file
+    """
+    def update_status(status, progress, message):
+        if status_callback:
+            status_callback(job_id, status, progress, message)
+        print(f"[{job_id}] {progress}% - {message}")
+    
+    try:
+        # Create paths
+        video_file = Path(video_path)
+        audio_file = Path(audio_path)
+        job_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
+        merged_video_path = job_dir / "final_video.mp4"
+        
+        if not video_file.exists():
+            raise Exception(f"Video file not found: {video_path}")
+        if not audio_file.exists():
+            raise Exception(f"Audio file not found: {audio_path}")
+        
+        update_status("processing", 96, "Starting video and audio merging...")
+        
+        # ffmpeg command to merge video and audio
+        cmd = [
+            "ffmpeg",
+            "-i", str(video_file),     # Input video
+            "-i", str(audio_file),     # Input audio
+            "-c:v", "copy",            # Copy video codec (no re-encoding)
+            "-c:a", "aac",             # Use AAC audio codec
+            "-map", "0:v:0",           # Map first video stream
+            "-map", "1:a:0",           # Map first audio stream
+            "-shortest",               # End when shortest stream ends
+            "-y",                      # Overwrite output file
+            str(merged_video_path)
+        ]
+        
+        # Run ffmpeg
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            raise Exception(f"FFmpeg failed: {result.stderr}")
+        
+        if not merged_video_path.exists():
+            raise Exception("Merged video file was not created")
+        
+        update_status("processing", 98, f"Video merged successfully: {merged_video_path}")
+        return str(merged_video_path)
+        
+    except Exception as e:
+        update_status("failed", 0, f"Video merging failed: {str(e)}")
+        raise Exception(f"Video merging failed: {str(e)}")
+
 def generate_voiceover(text_content: str, job_id: str) -> str:
     """
     Generate voiceover using ElevenLabs API.
@@ -288,12 +350,19 @@ class FinancialHelpScene(Scene):
         update_status("processing", 85, "Starting voiceover generation with ElevenLabs...")
         voiceover_path = generate_voiceover(text_content, job_id)
         if voiceover_path:
-            update_status("processing", 95, f"Voiceover generated successfully: {voiceover_path}")
+            update_status("processing", 90, f"Voiceover generated successfully: {voiceover_path}")
+            
+            # Merge video with voiceover
+            try:
+                merged_video_path = merge_video_with_audio(video_path, voiceover_path, job_id, status_callback)
+                update_status("processing", 99, f"Final video with audio created: {merged_video_path}")
+                return merged_video_path  # Return the merged video instead
+            except Exception as e:
+                update_status("processing", 95, f"Merging failed, returning original video: {str(e)}")
+                return video_path  # Return original video if merging fails
         else:
             update_status("processing", 90, "Voiceover generation failed, but video is available")
-        
-        # Return the path to the video file
-        return video_path
+            return video_path
         
     except Exception as e:
         update_status("failed", 0, f"Video generation failed: {str(e)}")
