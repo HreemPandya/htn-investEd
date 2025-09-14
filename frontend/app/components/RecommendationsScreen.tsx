@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import type React from "react"
 
 interface UserData {
   hasRBCAccount?: boolean
@@ -236,83 +237,50 @@ const RecommendationsScreen = ({ userData, onNext, onBack }: RecommendationsScre
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="p-6 flex justify-between items-center">
-        {onBack && (
-          <button
-            onClick={() => onBack("goals")}
-            className="px-6 py-3 font-semibold text-lg rounded-2xl transition-colors"
-            style={{ 
-              backgroundColor: '#F3F4F6',
-              color: '#23231A',
-              border: 'none',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-            }}
-          >
-            ← Back
-          </button>
-        )}
-        <img 
-          src="/images/investEd-logo.png" 
-          alt="InvestEd Logo"
-          className="h-24 w-auto object-contain"
-        />
-        <div className="w-24"></div> {/* Spacer for centering */}
-      </div>
+{/* Header with back + progress bar */}
+<div className="p-6 flex justify-between items-center">
+  {onBack ? (
+    <button
+      onClick={() => onBack("goals")}
+      className="px-5 py-2.5 text-base font-medium rounded-xl bg-gray-200 hover:bg-gray-300 transition flex items-center justify-center"
+      aria-label="Back"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6 text-[#23231A]"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+  ) : (
+    <div className="w-12" />
+  )}
 
-      {/* Progress Bar */}
-      <div className="px-6 mb-6">
-        <div className="flex justify-between text-sm mb-2" style={{ color: '#91918D' }}>
-          <span>Step 3 of 3</span>
-          <span>100%</span>
-        </div>
-        <div className="w-full rounded-full h-2" style={{ backgroundColor: '#E5E7EB' }}>
-          <div
-            className="h-2 rounded-full transition-all duration-300"
-            style={{ 
-              backgroundColor: '#005DAA',
-              width: '100%'
-            }}
-          />
-        </div>
-      </div>
+  {/* Progress bar */}
+  <div className="flex-1 mx-6">
+    <div className="flex justify-between text-sm mb-1" style={{ color: "#91918D" }}>
+      <span>Step 3 of 3</span>
+      <span>100%</span>
+    </div>
+    <div className="w-full rounded-full h-2 bg-gray-200">
+      <div
+        className="h-2 rounded-full transition-all duration-300"
+        style={{
+          backgroundColor: "#005DAA",
+          width: "100%",
+        }}
+      />
+    </div>
+  </div>
 
-      <div className="px-6 pb-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Wizard Section */}
-          <div className="text-center mb-8">
-          {/* Speech Bubble */}
-          <div className="relative mb-6">
-            <div 
-              className="rounded-3xl p-6 mx-auto max-w-sm relative"
-              style={{ backgroundColor: '#FFDBAC' }}
-            >
-              <p className="text-lg font-semibold" style={{ color: '#23231A' }}>
-                Based on your goals and spending, I've prepared some investment recommendations for you!
-              </p>
-              {/* Speech bubble tail */}
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
-                <div 
-                  className="w-6 h-6 transform rotate-45"
-                  style={{ backgroundColor: '#FFDBAC' }}
-                />
-              </div>
-            </div>
-          </div>
+  {/* Right spacer for symmetry */}
+  <div className="w-12" />
+</div>
 
-          <div className="w-32 h-32 mx-auto mb-6 relative">
-            <img 
-              src="/images/wizard-charcter.png" 
-              alt="Portfolius the Wizard"
-              className="w-full h-full object-contain"
-            />
-          </div>
-
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#23231A' }}>Investment Recommendations</h1>
-          <p className="text-lg text-balance" style={{ color: '#91918D' }}>
-            Choose the investment plan that best fits your financial situation and goals
-          </p>
-        </div>
 
         {/* Spending Insights Summary */}
         <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
@@ -452,7 +420,10 @@ const RecommendationsScreen = ({ userData, onNext, onBack }: RecommendationsScre
                       <span className="text-2xl">{goal.icon}</span>
                       <div>
                         <div className="font-medium">{goal.name}</div>
-                        <div className="text-sm text-gray-600">${goal.suggestedAmount.toLocaleString()} target</div>
+                        <div className="text-sm text-gray-600">  ${(goal.suggestedAmount ?? 0).toLocaleString()} 
+                          target
+                          </div>
+
                       </div>
                     </div>
 
@@ -485,8 +456,6 @@ const RecommendationsScreen = ({ userData, onNext, onBack }: RecommendationsScre
           </button>
         </div>
         </div>
-      </div>
-    </div>
   )
 }
 

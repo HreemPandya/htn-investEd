@@ -5,11 +5,8 @@ import { useState } from "react"
 interface Goal {
   id: string
   name: string
-  icon: string
-  description: string
-  suggestedAmount: number
-  timeline: string
-  color: string
+  amount: number
+  timeline?: string
   isCustom?: boolean
 }
 
@@ -27,383 +24,181 @@ interface GoalSettingScreenProps {
 }
 
 const GoalSettingScreen = ({ userData, onNext, onBack }: GoalSettingScreenProps) => {
-  const [selectedGoals, setSelectedGoals] = useState<Goal[]>([])
-  const [customGoal, setCustomGoal] = useState({ name: "", amount: "", timeline: "" })
-  const [showCustomForm, setShowCustomForm] = useState(false)
+  const [goals, setGoals] = useState<Goal[]>([])
+  const [goalName, setGoalName] = useState("")
+  const [amount, setAmount] = useState(0)
+  const [showWizard, setShowWizard] = useState(true)
 
-  const predefinedGoals = [
-    {
-      id: "car",
-      name: "First Car",
-      icon: "🚗",
-      description: "Get the freedom to go anywhere",
-      suggestedAmount: 15000,
-      timeline: "24 months",
-      color: "bg-blue-50 text-blue-600 border-blue-200",
-    },
-    {
-      id: "house",
-      name: "First House",
-      icon: "🏠",
-      description: "Down payment for your dream home",
-      suggestedAmount: 50000,
-      timeline: "60 months",
-      color: "bg-green-50 text-green-600 border-green-200",
-    },
-  ]
-
-  const handleGoalSelect = (goal: Goal) => {
-    const isSelected = selectedGoals.some((g) => g.id === goal.id)
-
-    if (isSelected) {
-      setSelectedGoals(selectedGoals.filter((g) => g.id !== goal.id))
-    } else {
-      setSelectedGoals([...selectedGoals, goal])
+  const handleAddGoal = () => {
+    if (!goalName || amount <= 0) return
+    const newGoal: Goal = {
+      id: "goal_" + Date.now(),
+      name: goalName,
+      amount,
+      isCustom: true,
     }
-  }
-
-  const handleCustomGoalSubmit = () => {
-    if (customGoal.name && customGoal.amount && customGoal.timeline) {
-      const newGoal = {
-        id: "custom_" + Date.now(),
-        name: customGoal.name,
-        icon: "🎯",
-        description: "Your custom goal",
-        suggestedAmount: Number.parseInt(customGoal.amount),
-        timeline: customGoal.timeline + " months",
-        color: "bg-gray-50 text-gray-700 border-gray-200",
-        isCustom: true,
-      }
-
-      setSelectedGoals([...selectedGoals, newGoal as Goal])
-      setCustomGoal({ name: "", amount: "", timeline: "" })
-      setShowCustomForm(false)
-    }
+    setGoals([...goals, newGoal])
+    setGoalName("")
+    setAmount(0)
   }
 
   const handleNext = () => {
     onNext("recommendations", {
       ...userData,
-      goals: selectedGoals.map((goal: Goal) => ({
-        ...goal,
-        priority: selectedGoals.indexOf(goal) + 1,
-      })),
+      goals,
     })
   }
 
-  const totalGoalAmount = selectedGoals.reduce((sum: number, goal: Goal) => sum + goal.suggestedAmount, 0)
-  const averageTimeline =
-    selectedGoals.length > 0
-      ? Math.round(selectedGoals.reduce((sum: number, goal: Goal) => sum + Number.parseInt(goal.timeline), 0) / selectedGoals.length)
-      : 0
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
+    <div className="min-h-screen bg-white flex flex-col justify-between">
+      {/* Header with back + progress bar */}
       <div className="p-6 flex justify-between items-center">
-        {onBack && (
+        {onBack ? (
           <button
             onClick={() => onBack("personalization")}
-            className="px-6 py-3 font-semibold text-lg rounded-2xl transition-colors"
-            style={{ 
-              backgroundColor: '#F3F4F6',
-              color: '#23231A',
-              border: 'none',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-            }}
+            className="px-5 py-2.5 text-base font-medium rounded-xl bg-gray-200 hover:bg-gray-300 transition flex items-center justify-center"
+            aria-label="Back"
           >
-            ← Back
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-[#23231A]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
+        ) : (
+          <div className="w-12" />
         )}
-        <img 
-          src="/images/investEd-logo.png" 
-          alt="InvestEd Logo"
-          className="h-24 w-auto object-contain"
-        />
-        <div className="w-24"></div> {/* Spacer for centering */}
+
+        <div className="flex-1 mx-6">
+          <div className="flex justify-between text-sm mb-1" style={{ color: "#91918D" }}>
+            <span>Step 2 of 3</span>
+            <span>67%</span>
+          </div>
+          <div className="w-full rounded-full h-2 bg-gray-200">
+            <div
+              className="h-2 rounded-full transition-all duration-300"
+              style={{
+                backgroundColor: "#005DAA",
+                width: "67%",
+              }}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="px-6 mb-6">
-        <div className="flex justify-between text-sm mb-2" style={{ color: '#91918D' }}>
-          <span>Step 2 of 3</span>
-          <span>67%</span>
-        </div>
-        <div className="w-full rounded-full h-2" style={{ backgroundColor: '#E5E7EB' }}>
-          <div
-            className="h-2 rounded-full transition-all duration-300"
-            style={{ 
-              backgroundColor: '#005DAA',
-              width: '67%'
-            }}
+      {/* Wizard Assistant at Top */}
+      {showWizard && (
+        <div className="mx-6 mb-4 bg-[#FFDBAC] rounded-2xl p-4 shadow-md relative">
+          <button
+            onClick={() => setShowWizard(false)}
+            className="absolute top-2 right-2 text-gray-700 hover:text-black"
+            aria-label="Close Wizard"
+          >
+            ✕
+          </button>
+
+          <p className="text-sm font-semibold mb-2" style={{ color: "#23231A" }}>
+            💡 Portfolius says:
+          </p>
+            <p
+            className="text-sm"
+            style={{ color: "#23231A", maxWidth: "60%", wordBreak: "break-word" }}
+            >
+            Enter your goal and how much you want to save. Start small, grow big!
+            </p>
+          <img
+            src="/images/wizard-point.png"
+            alt="Wizard Assistant"
+            className="absolute bottom-0 right-0 h-24 w-24 object-contain"
           />
         </div>
-      </div>
+      )}
 
-      <div className="px-6 pb-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Wizard Section */}
-          <div className="text-center mb-8">
-          {/* Speech Bubble */}
-          <div className="relative mb-6">
-            <div 
-              className="rounded-3xl p-6 mx-auto max-w-sm relative"
-              style={{ backgroundColor: '#FFDBAC' }}
-            >
-              <p className="text-lg font-semibold" style={{ color: '#23231A' }}>
-                As a financially responsible student, what goals are you aiming for?
-              </p>
-              {/* Speech bubble tail */}
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
-                <div 
-                  className="w-6 h-6 transform rotate-45"
-                  style={{ backgroundColor: '#FFDBAC' }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="w-32 h-32 mx-auto mb-6 relative">
-            <img 
-              src="/images/wizard-point.png" 
-              alt="Portfolius the Wizard"
-              className="w-full h-full object-contain"
+      {/* Goal Form */}
+      <div className="px-6 flex-1 flex items-center justify-center">
+        <div className="max-w-md w-full space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: "#23231A" }}>
+              Goal Name
+            </label>
+            <input
+              type="text"
+              value={goalName}
+              onChange={(e) => setGoalName(e.target.value)}
+              placeholder="e.g. Laptop"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#005DAA]"
             />
           </div>
 
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#23231A' }}>What are your goals?</h1>
-          <p className="text-lg text-balance" style={{ color: '#91918D' }}>
-            Let's identify what you're working towards. Pick the goals that matter most to you!
-          </p>
-        </div>
-
-        {/* Goal Selection Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {predefinedGoals.map((goal) => {
-            const isSelected = selectedGoals.some((g: Goal) => g.id === goal.id)
-
-            return (
-              <div
-                key={goal.id}
-                onClick={() => handleGoalSelect(goal)}
-                className={`relative p-8 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
-                  isSelected
-                    ? "shadow-lg scale-105"
-                    : "bg-white border-gray-200 hover:border-gray-300"
-                }`}
-                style={isSelected ? {
-                  backgroundColor: goal.id === 'car' ? '#EFF6FF' : '#F0FDF4',
-                  borderColor: goal.id === 'car' ? '#3B82F6' : '#22C55E'
-                } : {}}
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: "#23231A" }}>
+              Amount
+            </label>
+            <div className="flex items-center space-x-3">
+              <button
+                type="button"
+                onClick={() => setAmount((prev) => Math.max(0, prev - 100))}
+                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
               >
-                {/* Selection Indicator */}
-                {isSelected && (
-                  <div 
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
-                    style={{ 
-                      backgroundColor: goal.id === 'car' ? '#3B82F6' : '#22C55E'
-                    }}
-                  >
-                    <span className="text-white text-sm font-bold">✓</span>
-                  </div>
-                )}
+                –
+              </button>
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))}
+                className="w-full text-center px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#005DAA]"
+              />
+              <button
+                type="button"
+                onClick={() => setAmount((prev) => prev + 100)}
+                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+              >
+                +
+              </button>
+            </div>
+          </div>
 
-                <div className="text-center">
-                  <div className="text-5xl mb-4">{goal.icon}</div>
-                  <h3 className="font-semibold text-xl mb-3" style={{ color: '#23231A' }}>{goal.name}</h3>
-                  <p className="text-base mb-4 text-balance" style={{ color: '#91918D' }}>{goal.description}</p>
-
-                  <div className="space-y-2">
-                    <div className="text-lg font-bold" style={{ color: '#23231A' }}>${goal.suggestedAmount.toLocaleString()}</div>
-                    <div className="text-sm" style={{ color: '#91918D' }}>Target: {goal.timeline}</div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-
-          {/* Add Custom Goal Card */}
-          <div
-            onClick={() => setShowCustomForm(true)}
-            className="p-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 flex items-center justify-center"
-            style={{ 
-              borderColor: '#91918D',
-              backgroundColor: '#F9FAFB'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#005DAA'
-              e.currentTarget.style.backgroundColor = '#F0F9FF'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#91918D'
-              e.currentTarget.style.backgroundColor = '#F9FAFB'
-            }}
+          <button
+            onClick={handleAddGoal}
+            disabled={!goalName || amount <= 0}
+            className="w-full py-3 bg-[#005DAA] text-white font-semibold rounded-xl hover:bg-blue-800 disabled:opacity-50 transition shadow-md"
           >
-            <div className="text-center">
-              <div className="text-5xl mb-4">➕</div>
-              <h3 className="font-semibold text-xl mb-2" style={{ color: '#23231A' }}>Add Custom Goal</h3>
-              <p className="text-base" style={{ color: '#91918D' }}>Something else in mind?</p>
-            </div>
-          </div>
-        </div>
+            Add Goal
+          </button>
 
-        {/* Custom Goal Form Modal */}
-        {showCustomForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-              <h3 className="text-2xl font-bold mb-6" style={{ color: '#23231A' }}>Add Your Custom Goal</h3>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-lg font-semibold mb-3" style={{ color: '#23231A' }}>Goal Name</label>
-                  <input
-                    type="text"
-                    value={customGoal.name}
-                    onChange={(e) => setCustomGoal({ ...customGoal, name: e.target.value })}
-                    placeholder="e.g., Gaming Setup, Study Abroad..."
-                    className="w-full px-6 py-4 rounded-2xl text-lg font-medium transition-colors"
-                    style={{ 
-                      backgroundColor: '#F3F4F6',
-                      color: '#23231A',
-                      border: 'none',
-                      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-lg font-semibold mb-3" style={{ color: '#23231A' }}>Target Amount ($)</label>
-                  <input
-                    type="number"
-                    value={customGoal.amount}
-                    onChange={(e) => setCustomGoal({ ...customGoal, amount: e.target.value })}
-                    placeholder="5000"
-                    className="w-full px-6 py-4 rounded-2xl text-lg font-medium transition-colors"
-                    style={{ 
-                      backgroundColor: '#F3F4F6',
-                      color: '#23231A',
-                      border: 'none',
-                      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-lg font-semibold mb-3" style={{ color: '#23231A' }}>Timeline (months)</label>
-                  <input
-                    type="number"
-                    value={customGoal.timeline}
-                    onChange={(e) => setCustomGoal({ ...customGoal, timeline: e.target.value })}
-                    placeholder="12"
-                    className="w-full px-6 py-4 rounded-2xl text-lg font-medium transition-colors"
-                    style={{ 
-                      backgroundColor: '#F3F4F6',
-                      color: '#23231A',
-                      border: 'none',
-                      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex space-x-4 mt-8">
-                <button
-                  onClick={() => setShowCustomForm(false)}
-                  className="flex-1 px-6 py-4 font-semibold text-lg rounded-2xl transition-colors"
-                  style={{ 
-                    backgroundColor: '#F3F4F6',
-                    color: '#23231A',
-                    border: 'none',
-                    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-                  }}
+          {/* List of added goals */}
+          {goals.length > 0 && (
+            <div className="mt-6 space-y-3">
+              <h3 className="text-lg font-semibold" style={{ color: "#23231A" }}>
+                Your Goals
+              </h3>
+              {goals.map((goal) => (
+                <div
+                  key={goal.id}
+                  className="p-4 border rounded-xl flex justify-between items-center"
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCustomGoalSubmit}
-                  className="flex-1 px-6 py-4 font-semibold text-lg rounded-2xl transition-colors"
-                  style={{ 
-                    backgroundColor: '#005DAA',
-                    color: 'white',
-                    border: 'none',
-                    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                    letterSpacing: '0.5px'
-                  }}
-                >
-                  Add Goal
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Selected Goals Summary */}
-        {selectedGoals.length > 0 && (
-          <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
-            <h3 className="font-semibold text-lg mb-4">Your Selected Goals ({selectedGoals.length})</h3>
-
-            <div className="grid md:grid-cols-3 gap-6 mb-6">
-              <div className="text-center p-4 bg-rbc-blue/5 rounded-xl">
-                <div className="text-2xl font-bold text-rbc-blue">${totalGoalAmount.toLocaleString()}</div>
-                <div className="text-sm text-gray-600">Total Target Amount</div>
-              </div>
-
-              <div className="text-center p-4 bg-growth-green/5 rounded-xl">
-                <div className="text-2xl font-bold text-growth-green">{averageTimeline} months</div>
-                <div className="text-sm text-gray-600">Average Timeline</div>
-              </div>
-
-              <div className="text-center p-4 bg-warm-yellow/10 rounded-xl">
-                <div className="text-2xl font-bold text-yellow-600">
-                  ${Math.round(totalGoalAmount / averageTimeline)}
-                </div>
-                <div className="text-sm text-gray-600">Monthly Target</div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {selectedGoals.map((goal: Goal, index: number) => (
-                <div key={goal.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{goal.icon}</span>
-                    <div>
-                      <div className="font-medium">{goal.name}</div>
-                      <div className="text-sm text-gray-600">
-                        ${goal.suggestedAmount.toLocaleString()} in {goal.timeline}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleGoalSelect(goal)}
-                    className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                  >
-                    ✕
-                  </button>
+                  <span>{goal.name} - ${goal.amount.toLocaleString()}</span>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      </div>
 
-        {/* Navigation */}
-        <div className="flex justify-center">
-          <button
-            onClick={handleNext}
-            disabled={selectedGoals.length === 0}
-            className="px-8 py-3 bg-rbc-blue text-white font-semibold rounded-xl hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
-          >
-            Continue with {selectedGoals.length} goal{selectedGoals.length !== 1 ? "s" : ""}
-          </button>
-        </div>
-
-        {/* Motivational Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-gray-500 text-sm">
-            💡 Tip: Start with 1-3 goals to keep things manageable. You can always add more later!
-          </p>
-        </div>
-        </div>
+      {/* Continue Button */}
+      <div className="px-6 py-6 flex justify-center">
+        <button
+          onClick={handleNext}
+          disabled={goals.length === 0}
+          className="px-8 py-3 bg-[#005DAA] text-white font-semibold rounded-xl hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
+        >
+          Continue with {goals.length} goal{goals.length !== 1 ? "s" : ""}
+        </button>
       </div>
     </div>
   )
