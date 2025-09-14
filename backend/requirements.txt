@@ -1,3 +1,8 @@
 fastapi
 uvicorn[standard]
 sqlalchemy
+cohere
+python-dotenv
+manim
+uuid
+elevenlabs
