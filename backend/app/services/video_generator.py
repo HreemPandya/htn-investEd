@@ -32,7 +32,7 @@ def merge_video_with_audio(video_path: str, audio_path: str, job_id: str, status
         # Create paths
         video_file = Path(video_path)
         audio_file = Path(audio_path)
-        job_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
+        job_dir = Path(f"../htn-investEd/backend/videos/{job_id}")
         merged_video_path = job_dir / "final_video.mp4"
         
         if not video_file.exists():
@@ -96,7 +96,7 @@ def generate_voiceover(text_content: str, job_id: str) -> str:
             return ""
         
         # Create job directory if it doesn't exist
-        job_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
+        job_dir = Path(f"../htn-investEd/backend/videos/{job_id}")
         job_dir.mkdir(parents=True, exist_ok=True)
         
         # Initialize ElevenLabs client
@@ -215,7 +215,7 @@ def generate_financial_help_video(text_content: str, job_id: str, status_callbac
         print(f"[{job_id}] {progress}% - {message}")
     
     # Create job directory
-    job_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
+    job_dir = Path(f"../htn-investEd/backend/videos/{job_id}")
     job_dir.mkdir(parents=True, exist_ok=True)
     
     update_status("processing", 20, "Created job directory, preparing scene...")
