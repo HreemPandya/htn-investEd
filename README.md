@@ -3,7 +3,7 @@
 **InvestEd** is an AI-powered financial literacy app that transforms confusing bank statements into fun, engaging, and personalized explainer videos.  
 Built at **Hack the North 2025**, our goal was to help students (and beyond) understand their spending habits, save smarter, and invest toward their "my first..." goals — laptop, car, trip, and more.
 
----
+
 
 ## 🚀 Inspiration
 As university students, we know how overwhelming personal finance can feel. Charts, statements, and jargon rarely help — they only add stress.  
@@ -12,7 +12,6 @@ We wanted to make saving and investing **accessible, engaging, and educational**
 > 🧾 **76% of Canadians struggle with saving consistently**, and Millennials/Gen Z overspend by ~15% monthly vs. their budgets.  
 InvestEd helps close that gap.
 
----
 
 ## 🤖 What It Does
 - **AI Finance Assistant (Portfolius)**: Explains your spending habits in plain English.  
@@ -20,7 +19,6 @@ InvestEd helps close that gap.
 - **Interactive Web App**: Clean Next.js frontend where users can view insights, generate videos, and replay them anytime.  
 - **Positive Nudges**: Instead of guilt, InvestEd reframes overspending as opportunities to save & invest.  
 
----
 
 ## 🛠️ How We Built It
 - **Frontend**: Next.js + TailwindCSS → Clean, banking-inspired UI.  
@@ -30,7 +28,6 @@ InvestEd helps close that gap.
 - **Supabase Storage**: Stores and serves large MP4 files securely via public/signed URLs.  
 - **Deployment**: Frontend on Vercel; Backend on Render/Heroku.  
 
----
 
 ## 🧗 Challenges We Ran Into
 - CORS issues & API rewrites during frontend ↔ backend integration.  
@@ -38,7 +35,6 @@ InvestEd helps close that gap.
 - Handling **large MP4 storage & retrieval** with Supabase.  
 - Coordinating multiple independent components into one seamless pipeline.  
 
----
 
 ## 🏆 Accomplishments We’re Proud Of
 - Built a **full end-to-end pipeline**: Cohere → Manim → Supabase → Frontend in <30s.  
@@ -46,7 +42,6 @@ InvestEd helps close that gap.
 - Learned to optimize AI prompts, rendering configs, and storage integration for hackathon constraints.  
 - Delivered a **working demo** that turns raw spending data into a clear, animated video.  
 
----
 
 ## 💡 What We Learned
 - **Prompt engineering** is critical for syncing AI-generated scripts with video timing.  
@@ -54,19 +49,16 @@ InvestEd helps close that gap.
 - **Rendering optimizations** (fps, resolution, animation simplification) can make or break performance.  
 - **Team integration** matters: constant communication = faster debugging.  
 
----
 
 ## 🔮 What’s Next
 - **Gamified learning**: Streaks & rewards for saving more consistently.  
 - **Cloud scaling**: Offload heavy rendering to worker nodes for parallel video generation.  
 - **Mobile apps**: Bring InvestEd to iOS & Android for anywhere access.  
 
----
 
 ## 📸 Screenshots / Demo
-*(Insert screenshots or a demo GIF here — highly recommended for judges and recruiters!)*  
+ 
 
----
 
 ## ⚡ Getting Started
 
