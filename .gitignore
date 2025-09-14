@@ -1,2 +1,5 @@
 ai-video-backend/.env
 backend/videos/
+node_modules
+.venv
+.env
