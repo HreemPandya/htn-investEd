@@ -108,8 +108,11 @@ const InsightsDashboard = ({ userData, onNext }: InsightsDashboardProps) => {
                     <span className="font-semibold text-xl" style={{ color: '#23231A' }}>{goal.name}</span>
                   </div>
                   <span className="text-lg font-medium" style={{ color: '#005DAA' }}>
-                    ${Math.round((goal.suggestedAmount * progress) / 100).toLocaleString()} / $
-                    {goal.suggestedAmount.toLocaleString()}
+                    <span className="text-lg font-medium" style={{ color: '#005DAA' }}>
+                      ${Math.round(((goal.suggestedAmount ?? 0) * progress) / 100).toLocaleString()} / $
+                      {(goal.suggestedAmount ?? 0).toLocaleString()}
+                    </span>
+
                   </span>
                 </div>
 
