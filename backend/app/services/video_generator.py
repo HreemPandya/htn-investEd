@@ -72,10 +72,10 @@ class FinancialHelpScene(Scene):
         if current_line:
             lines.append(current_line)
         
-        # Limit to maximum 4 lines per chunk to avoid overflow
-        if len(lines) > 4:
-            # Split into smaller chunks
-            return lines[:4]
+        # Limit to maximum 3 lines per chunk to avoid overflow
+        if len(lines) > 3:
+            # Return only first 3 lines for this chunk
+            return lines[:3]
         
         return lines
     
@@ -101,8 +101,6 @@ class FinancialHelpScene(Scene):
         self.wait(1)
         
         # Process each chunk as a separate "grid cell"
-        previous_bg = None
-        previous_content = None
         
         for i, chunk in enumerate(content_chunks):
             # Create content for this chunk
@@ -141,27 +139,23 @@ class FinancialHelpScene(Scene):
             )
             bg_rect.move_to(content_group.get_center())
             
-            # Animate this chunk
-            if i == 0:
-                # First chunk: Fade in
-                self.play(
-                    FadeIn(bg_rect),
-                    FadeIn(content_group),
-                    run_time=1.5
-                )
-            else:
-                # Subsequent chunks: Transform from previous
-                self.play(
-                    Transform(previous_bg, bg_rect),
-                    Transform(previous_content, content_group),
-                    run_time=1.2
-                )
+            # Add objects to scene and animate
+            self.add(bg_rect, content_group)
+            self.play(
+                FadeIn(bg_rect),
+                FadeIn(content_group),
+                run_time=1.5
+            )
             
             self.wait(3)  # Display time for each chunk
             
-            # Store for next transformation
-            previous_bg = bg_rect
-            previous_content = content_group
+            # Remove objects from scene before next chunk
+            self.play(
+                FadeOut(bg_rect),
+                FadeOut(content_group),
+                run_time=0.8
+            )
+            self.remove(bg_rect, content_group)  # Explicitly remove from scene
         
         # Final scene: Summary or call-to-action
         summary_text = Text(
@@ -172,16 +166,7 @@ class FinancialHelpScene(Scene):
         )
         summary_text.move_to([0, footer_y, 0])
         
-        if previous_bg and previous_content:
-            self.play(
-                FadeOut(previous_bg),
-                FadeOut(previous_content),
-                FadeIn(summary_text),
-                run_time=1.5
-            )
-        else:
-            self.play(FadeIn(summary_text), run_time=1.5)
-        
+        self.play(FadeIn(summary_text), run_time=1.5)
         self.wait(2)
         
         # Final fade out
