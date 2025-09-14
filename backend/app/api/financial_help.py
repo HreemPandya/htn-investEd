@@ -62,26 +62,55 @@ async def generate_video_with_tracking(text_content: str, job_id: str):
         video_path = generate_financial_help_video(text_content, job_id, update_job_status)
         
         if video_path:
-            update_job_status(job_id, "completed", 100, "Video and voiceover generation completed successfully")
-            
-            # Update file readiness flags
+            # Check if we got the final merged video with audio
             job_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
-            video_files = list(job_dir.glob("**/*.mp4"))
-            voiceover_files = list(job_dir.glob("**/*.mp3"))
-            final_video_file = job_dir / "final_video.mp4"
+            final_video_file = Path(video_path)
             
-            current_status = get_job_status(job_id)
-            current_status["video_ready"] = len(video_files) > 0
-            current_status["voiceover_ready"] = len(voiceover_files) > 0
-            current_status["final_video_ready"] = final_video_file.exists()
-            job_status_store[job_id] = current_status
-            
-            # Save updated status
-            status_file = job_dir / "status.json"
-            with open(status_file, 'w') as f:
-                json.dump(current_status, f, indent=2)
+            # Video generation returns the merged video path, verify it exists and has content
+            if final_video_file.exists() and final_video_file.stat().st_size > 0:
+                # Check for individual components
+                video_files = list(job_dir.glob("**/FinancialHelpScene.mp4"))  # Original video
+                voiceover_files = list(job_dir.glob("**/voiceover.mp3"))       # Audio file
+                
+                # Check if we have the final merged video OR just the original video
+                if final_video_file.name == "final_video.mp4":
+                    # We have the merged video with audio
+                    update_job_status(job_id, "completed", 100, "Final video with synchronized audio created successfully")
+                    
+                    current_status = get_job_status(job_id)
+                    current_status["video_ready"] = len(video_files) > 0
+                    current_status["voiceover_ready"] = len(voiceover_files) > 0
+                    current_status["final_video_ready"] = True
+                    current_status["final_video_path"] = str(video_path)
+                    job_status_store[job_id] = current_status
+                    
+                    # Save updated status
+                    status_file = job_dir / "status.json"
+                    with open(status_file, 'w') as f:
+                        json.dump(current_status, f, indent=2)
+                        
+                elif "FinancialHelpScene.mp4" in str(video_path):
+                    # We have the original video (audio generation failed, likely quota issue)
+                    update_job_status(job_id, "completed", 100, "Video created successfully (audio generation failed due to quota)")
+                    
+                    current_status = get_job_status(job_id)
+                    current_status["video_ready"] = len(video_files) > 0
+                    current_status["voiceover_ready"] = len(voiceover_files) > 0 and any(f.stat().st_size > 0 for f in voiceover_files)
+                    current_status["final_video_ready"] = False
+                    current_status["video_path"] = str(video_path)
+                    job_status_store[job_id] = current_status
+                    
+                    # Save updated status
+                    status_file = job_dir / "status.json"
+                    with open(status_file, 'w') as f:
+                        json.dump(current_status, f, indent=2)
+                else:
+                    # Unknown video file
+                    update_job_status(job_id, "failed", 0, "Video generation produced unexpected output")
+            else:
+                update_job_status(job_id, "failed", 0, "Final video file is missing or empty")
         else:
-            update_job_status(job_id, "failed", 0, "Video generation failed")
+            update_job_status(job_id, "failed", 0, "Video generation pipeline failed")
             
     except Exception as e:
         update_job_status(job_id, "failed", 0, f"Error during generation: {str(e)}")
@@ -190,7 +219,18 @@ async def get_video_status(job_id: str):
         }
     }
     
-    # Add video file info if available
+    # Check for final merged video (highest priority)
+    final_video_file = video_dir / "final_video.mp4"
+    if final_video_file.exists() and final_video_file.stat().st_size > 0:
+        response["files"]["final_video"] = {
+            "url": f"/videos/{job_id}/final_video.mp4",
+            "file_size": final_video_file.stat().st_size,
+            "file_name": "final_video.mp4"
+        }
+        response["final_video_ready"] = True
+        response["status"] = "completed"  # Override status if final video is ready
+    
+    # Add original video file info if available
     if video_files:
         video_path = video_files[0]
         response["files"]["video"] = {
@@ -203,21 +243,16 @@ async def get_video_status(job_id: str):
     # Add voiceover file info if available
     if voiceover_files:
         voiceover_path = voiceover_files[0]
-        response["files"]["voiceover"] = {
-            "url": f"/videos/{job_id}/{voiceover_path.name}",
-            "file_size": voiceover_path.stat().st_size,
-            "file_name": voiceover_path.name
-        }
-        response["voiceover_ready"] = True
-    
-    # Add final merged video file info if available
-    if final_video_file.exists():
-        response["files"]["final_video"] = {
-            "url": f"/videos/{job_id}/final_video.mp4",
-            "file_size": final_video_file.stat().st_size,
-            "file_name": "final_video.mp4"
-        }
-        response["final_video_ready"] = True
+        # Only show voiceover info if file has content
+        if voiceover_path.stat().st_size > 0:
+            response["files"]["voiceover"] = {
+                "url": f"/videos/{job_id}/{voiceover_path.name}",
+                "file_size": voiceover_path.stat().st_size,
+                "file_name": voiceover_path.name
+            }
+            response["voiceover_ready"] = True
+        else:
+            response["voiceover_ready"] = False
     
     return response
 
