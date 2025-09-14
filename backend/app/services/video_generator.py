@@ -55,12 +55,13 @@ class FinancialHelpScene(Scene):
         
         return chunks
     
-    def create_grid_text(self, text, max_width=35):
-        """Create text that fits within a grid cell with proper line wrapping"""
+    def create_grid_text_chunks(self, text, max_width=35, max_lines_per_chunk=3):
+        """Create multiple text chunks that fit within grid cells with proper line wrapping"""
         words = text.split()
         lines = []
         current_line = ""
         
+        # First, create all lines
         for word in words:
             if len(current_line + " " + word) <= max_width:
                 current_line += " " + word if current_line else word
@@ -72,12 +73,13 @@ class FinancialHelpScene(Scene):
         if current_line:
             lines.append(current_line)
         
-        # Limit to maximum 3 lines per chunk to avoid overflow
-        if len(lines) > 3:
-            # Return only first 3 lines for this chunk
-            return lines[:3]
+        # Now split lines into chunks of max_lines_per_chunk
+        chunks = []
+        for i in range(0, len(lines), max_lines_per_chunk):
+            chunk_lines = lines[i:i + max_lines_per_chunk]
+            chunks.append(chunk_lines)
         
-        return lines
+        return chunks
     
     def construct(self):
         # Define the layout grid (like CSS Grid)
@@ -100,62 +102,66 @@ class FinancialHelpScene(Scene):
         self.play(Write(title), run_time=1.5)
         self.wait(1)
         
-        # Process each chunk as a separate "grid cell"
+        # Process each chunk as separate "grid cells" - create as many scenes as needed
+        scene_count = 0
         
-        for i, chunk in enumerate(content_chunks):
-            # Create content for this chunk
-            lines = self.create_grid_text(chunk, max_width=35)
+        for chunk_text in content_chunks:
+            # Create multiple sub-chunks from this text to ensure ALL content is shown
+            text_sub_chunks = self.create_grid_text_chunks(chunk_text, max_width=35, max_lines_per_chunk=3)
             
-            # Create text objects for each line with smaller font
-            text_objects = []
-            for line in lines:
-                if line.strip():  # Only add non-empty lines
-                    text_obj = Text(line.strip(), font_size=24, color=WHITE)  # Smaller font size
-                    text_objects.append(text_obj)
-            
-            # Skip if no valid text objects
-            if not text_objects:
-                continue
+            for sub_chunk_lines in text_sub_chunks:
+                scene_count += 1
                 
-            # Arrange lines vertically in the content area
-            content_group = VGroup(*text_objects)
-            content_group.arrange(DOWN, buff=0.2, center=True)  # Center alignment instead of LEFT
-            content_group.move_to([0, content_y, 0])
-            
-            # Ensure content fits within the middle area bounds
-            if content_group.height > 3.5:  # Stricter height limit
-                scale_factor = 3.5 / content_group.height
-                content_group.scale(scale_factor)
+                # Create text objects for each line with smaller font
+                text_objects = []
+                for line in sub_chunk_lines:
+                    if line.strip():  # Only add non-empty lines
+                        text_obj = Text(line.strip(), font_size=24, color=WHITE)
+                        text_objects.append(text_obj)
+                
+                # Skip if no valid text objects
+                if not text_objects:
+                    continue
+                    
+                # Arrange lines vertically in the content area
+                content_group = VGroup(*text_objects)
+                content_group.arrange(DOWN, buff=0.2, center=True)
                 content_group.move_to([0, content_y, 0])
-            
-            # Create a subtle background for this content chunk
-            bg_rect = RoundedRectangle(
-                width=content_group.width + 1,
-                height=content_group.height + 0.8,
-                corner_radius=0.2,
-                color=DARK_GRAY,
-                fill_opacity=0.1,
-                stroke_opacity=0.3
-            )
-            bg_rect.move_to(content_group.get_center())
-            
-            # Add objects to scene and animate
-            self.add(bg_rect, content_group)
-            self.play(
-                FadeIn(bg_rect),
-                FadeIn(content_group),
-                run_time=1.5
-            )
-            
-            self.wait(3)  # Display time for each chunk
-            
-            # Remove objects from scene before next chunk
-            self.play(
-                FadeOut(bg_rect),
-                FadeOut(content_group),
-                run_time=0.8
-            )
-            self.remove(bg_rect, content_group)  # Explicitly remove from scene
+                
+                # Ensure content fits within the middle area bounds
+                if content_group.height > 3.5:  # Stricter height limit
+                    scale_factor = 3.5 / content_group.height
+                    content_group.scale(scale_factor)
+                    content_group.move_to([0, content_y, 0])
+                
+                # Create a subtle background for this content chunk
+                bg_rect = RoundedRectangle(
+                    width=content_group.width + 1,
+                    height=content_group.height + 0.8,
+                    corner_radius=0.2,
+                    color=DARK_GRAY,
+                    fill_opacity=0.1,
+                    stroke_opacity=0.3
+                )
+                bg_rect.move_to(content_group.get_center())
+                
+                # Add objects to scene and animate
+                self.add(bg_rect, content_group)
+                self.play(
+                    FadeIn(bg_rect),
+                    FadeIn(content_group),
+                    run_time=1.5
+                )
+                
+                self.wait(3)  # Display time for each chunk
+                
+                # Remove objects from scene before next chunk
+                self.play(
+                    FadeOut(bg_rect),
+                    FadeOut(content_group),
+                    run_time=0.8
+                )
+                self.remove(bg_rect, content_group)  # Explicitly remove from scene
         
         # Final scene: Summary or call-to-action
         summary_text = Text(
