@@ -84,12 +84,16 @@ def generate_voiceover(text_content: str, job_id: str) -> str:
         Path to the generated audio file
     """
     try:
+        # Reload environment variables to ensure they're available
+        load_dotenv()
+        
         # Get ElevenLabs credentials from environment
         api_key = os.getenv("ELEVENLABS_API_KEY")
         voice_id = os.getenv("ELEVENLABS_VOICE_ID")
         
         if not api_key or not voice_id:
-            raise Exception("ElevenLabs API key or Voice ID not found in environment variables")
+            print(f"Error: Missing ElevenLabs credentials - API key: {bool(api_key)}, Voice ID: {bool(voice_id)}")
+            return ""
         
         # Create job directory if it doesn't exist
         job_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
@@ -98,33 +102,104 @@ def generate_voiceover(text_content: str, job_id: str) -> str:
         # Initialize ElevenLabs client
         client = elevenlabs.ElevenLabs(api_key=api_key)
         
-        # Generate audio using ElevenLabs
-        audio = client.text_to_speech.convert(
-            voice_id=voice_id,
-            text=text_content,
-            model_id="eleven_monolingual_v1"  # You can change this to other models if needed
-        )
-        
         # Save the audio file
         audio_file_path = job_dir / "voiceover.mp3"
         
-        # Save audio to file
-        with open(audio_file_path, "wb") as f:
-            for chunk in audio:
-                f.write(chunk)
+        # Generate and save audio using ElevenLabs with proper error handling
+        try:
+            print(f"[DEBUG] Calling ElevenLabs text_to_speech for {len(text_content)} characters")
+            
+            # The convert method returns a generator - errors happen during iteration
+            audio_generator = client.text_to_speech.convert(
+                voice_id=voice_id,
+                text=text_content,
+                model_id="eleven_monolingual_v1"
+            )
+            
+            print(f"[DEBUG] Got audio generator, starting to consume chunks...")
+            
+            # Collect audio data with error handling during iteration
+            audio_data = b""
+            chunk_count = 0
+            
+            for chunk in audio_generator:
+                chunk_count += 1
+                if chunk:
+                    audio_data += chunk
+                    print(f"[DEBUG] Chunk {chunk_count}: {len(chunk)} bytes")
+                else:
+                    print(f"[DEBUG] Empty chunk {chunk_count}")
+            
+            print(f"[DEBUG] Collected {len(audio_data)} bytes from {chunk_count} chunks")
+            
+            if len(audio_data) == 0:
+                print("No audio data collected from ElevenLabs")
+                return ""
+            
+            # Write to file
+            with open(audio_file_path, "wb") as f:
+                f.write(audio_data)
+                
+        except Exception as api_error:
+            # Handle different types of API errors
+            error_str = str(api_error)
+            print(f"[DEBUG] ElevenLabs API error during generation: {error_str}")
+            
+            if "quota_exceeded" in error_str or "401" in error_str:
+                print(f"ElevenLabs quota exceeded. Audio generation skipped.")
+                return ""
+            elif "429" in error_str or "system_busy" in error_str:
+                print(f"ElevenLabs system busy. Audio generation skipped.")
+                return ""
+            elif "rate_limit" in error_str:
+                print(f"Rate limit exceeded. Audio generation skipped.")
+                return ""
+            else:
+                print(f"ElevenLabs API error: {error_str}")
+                return ""
         
-        return str(audio_file_path)
+        # Verify file was created and has content
+        if audio_file_path.exists() and audio_file_path.stat().st_size > 0:
+            print(f"Voiceover generated successfully: {audio_file_path}, size: {audio_file_path.stat().st_size} bytes")
+            return str(audio_file_path)
+        else:
+            print(f"Voiceover file was created but is empty or missing")
+            return ""
         
     except Exception as e:
         print(f"Error generating voiceover: {str(e)}")
-        # Return empty string if voiceover generation fails - video will still work
         return ""
 
 # Old scene class removed - using the improved version in generate_financial_help_video function
 
+def get_audio_duration(audio_path: str) -> float:
+    """Get the duration of an audio file using ffprobe"""
+    try:
+        cmd = [
+            "ffprobe",
+            "-i", audio_path,
+            "-show_entries", "format=duration",
+            "-v", "quiet",
+            "-of", "csv=p=0"
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            return float(result.stdout.strip())
+        else:
+            print(f"ffprobe failed: {result.stderr}")
+            return 15.0  # Default fallback duration
+    except Exception as e:
+        print(f"Error getting audio duration: {e}")
+        return 15.0  # Default fallback duration
+
 def generate_financial_help_video(text_content: str, job_id: str, status_callback=None) -> str:
     """
-    Generate a Manim video for financial help text content.
+    Generate a Manim video for financial help text content, then merge with audio.
+    
+    Pipeline:
+    1. Generate video from text
+    2. Generate voiceover from same text
+    3. Merge video and audio into final output
     
     Args:
         text_content: The financial help text to animate
@@ -132,7 +207,7 @@ def generate_financial_help_video(text_content: str, job_id: str, status_callbac
         status_callback: Optional callback function to update job status
     
     Returns:
-        Path to the generated video file
+        Path to the final merged video file
     """
     def update_status(status, progress, message):
         if status_callback:
@@ -145,7 +220,10 @@ def generate_financial_help_video(text_content: str, job_id: str, status_callbac
     
     update_status("processing", 20, "Created job directory, preparing scene...")
     
-    # Create temporary scene file with CSS grid-like layout
+    # Create temporary scene file with the original working approach
+    # Properly escape the text content
+    escaped_content = text_content.replace('"', '\\"').replace("'", "\\'")
+    
     scene_content = f'''from manim import *
 import sys
 import os
@@ -154,12 +232,12 @@ import re
 class FinancialHelpScene(Scene):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.text_content = """{text_content}"""
+        self.text_content = """{escaped_content}"""
     
     def chunk_text(self, text, max_chars_per_chunk=150):
         """Split text into logical chunks based on sentences and length"""
         # Split by sentences first
-        sentences = re.split(r'(?<=[.!?])\\s+', text)
+        sentences = re.split(r'(?<=[.!?])' + r'\\s+', text)
         chunks = []
         current_chunk = ""
         
@@ -204,11 +282,7 @@ class FinancialHelpScene(Scene):
         return chunks
     
     def construct(self):
-        # Define the layout grid (like CSS Grid)
-        # Top area: 20% (for title/header)
-        # Middle area: 60% (for content)
-        # Bottom area: 20% (for footer/spacing)
-        
+        # Define the layout grid
         title_y = 3    # Top area
         content_y = 0  # Middle area (center)
         footer_y = -3  # Bottom area
@@ -224,17 +298,13 @@ class FinancialHelpScene(Scene):
         self.play(Write(title), run_time=1.5)
         self.wait(1)
         
-        # Process each chunk as separate "grid cells" - create as many scenes as needed
-        scene_count = 0
-        
+        # Process each chunk
         for chunk_text in content_chunks:
-            # Create multiple sub-chunks from this text to ensure ALL content is shown
+            # Create multiple sub-chunks from this text
             text_sub_chunks = self.create_grid_text_chunks(chunk_text, max_width=35, max_lines_per_chunk=3)
             
             for sub_chunk_lines in text_sub_chunks:
-                scene_count += 1
-                
-                # Create text objects for each line with smaller font
+                # Create text objects for each line
                 text_objects = []
                 for line in sub_chunk_lines:
                     if line.strip():  # Only add non-empty lines
@@ -250,8 +320,8 @@ class FinancialHelpScene(Scene):
                 content_group.arrange(DOWN, buff=0.2, center=True)
                 content_group.move_to([0, content_y, 0])
                 
-                # Ensure content fits within the middle area bounds
-                if content_group.height > 3.5:  # Stricter height limit
+                # Ensure content fits within bounds
+                if content_group.height > 3.5:
                     scale_factor = 3.5 / content_group.height
                     content_group.scale(scale_factor)
                     content_group.move_to([0, content_y, 0])
@@ -283,9 +353,9 @@ class FinancialHelpScene(Scene):
                     FadeOut(content_group),
                     run_time=0.8
                 )
-                self.remove(bg_rect, content_group)  # Explicitly remove from scene
+                self.remove(bg_rect, content_group)
         
-        # Final scene: Summary or call-to-action
+        # Final scene: Summary
         summary_text = Text(
             "Need more help? Ask another question!",
             font_size=24,
@@ -346,22 +416,26 @@ class FinancialHelpScene(Scene):
         video_path = str(video_files[0])
         update_status("processing", 80, f"Video generated successfully: {video_path}")
         
-        # Generate voiceover after video is complete
+        # Generate voiceover with the same text
         update_status("processing", 85, "Starting voiceover generation with ElevenLabs...")
+        print(f"[DEBUG] Text content for voiceover: {text_content[:100]}...")
+        print(f"[DEBUG] Text content length: {len(text_content)}")
         voiceover_path = generate_voiceover(text_content, job_id)
+        print(f"[DEBUG] Voiceover result: {voiceover_path}")
+        
         if voiceover_path:
             update_status("processing", 90, f"Voiceover generated successfully: {voiceover_path}")
             
             # Merge video with voiceover
             try:
                 merged_video_path = merge_video_with_audio(video_path, voiceover_path, job_id, status_callback)
-                update_status("processing", 99, f"Final video with audio created: {merged_video_path}")
-                return merged_video_path  # Return the merged video instead
+                update_status("processing", 100, f"Final video with audio created: {merged_video_path}")
+                return merged_video_path  # Return the merged video
             except Exception as e:
                 update_status("processing", 95, f"Merging failed, returning original video: {str(e)}")
                 return video_path  # Return original video if merging fails
         else:
-            update_status("processing", 90, "Voiceover generation failed, but video is available")
+            update_status("processing", 90, "Voiceover generation failed (likely quota exceeded), returning video without audio")
             return video_path
         
     except Exception as e:
