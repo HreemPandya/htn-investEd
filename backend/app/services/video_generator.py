@@ -5,64 +5,7 @@ import tempfile
 from pathlib import Path
 from manim import *
 
-class FinancialHelpScene(Scene):
-    def __init__(self, text_content, **kwargs):
-        super().__init__(**kwargs)
-        self.text_content = text_content
-    
-    def construct(self):
-        # Create title
-        title = Text("Financial Help", font_size=48, color=BLUE)
-        title.to_edge(UP)
-        
-        # Create the main text content
-        main_text = Text(
-            self.text_content,
-            font_size=24,
-            color=WHITE,
-            line_spacing=1.2
-        )
-        
-        # Split long text into multiple lines if needed
-        if len(self.text_content) > 100:
-            words = self.text_content.split()
-            lines = []
-            current_line = ""
-            
-            for word in words:
-                if len(current_line + " " + word) <= 50:
-                    current_line += " " + word if current_line else word
-                else:
-                    lines.append(current_line)
-                    current_line = word
-            
-            if current_line:
-                lines.append(current_line)
-            
-            main_text = VGroup(*[Text(line, font_size=24, color=WHITE) for line in lines])
-            main_text.arrange(DOWN, aligned_edge=LEFT, buff=0.3)
-        
-        # Center the text
-        main_text.move_to(ORIGIN)
-        
-        # Animation sequence
-        self.play(Write(title), run_time=1.5)
-        self.wait(0.5)
-        
-        self.play(FadeIn(main_text), run_time=2)
-        self.wait(3)
-        
-        # Highlight important parts (if any numbers or key terms)
-        if any(char.isdigit() for char in self.text_content):
-            highlight_box = SurroundingRectangle(main_text, color=YELLOW, buff=0.1)
-            self.play(Create(highlight_box), run_time=1)
-            self.wait(1)
-            self.play(FadeOut(highlight_box), run_time=0.5)
-        
-        self.wait(2)
-        
-        # Fade out
-        self.play(FadeOut(title), FadeOut(main_text), run_time=1.5)
+# Old scene class removed - using the improved version in generate_financial_help_video function
 
 def generate_financial_help_video(text_content: str, job_id: str) -> str:
     """
@@ -79,70 +22,166 @@ def generate_financial_help_video(text_content: str, job_id: str) -> str:
     job_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
     job_dir.mkdir(parents=True, exist_ok=True)
     
-    # Create temporary scene file
+    # Create temporary scene file with CSS grid-like layout
     scene_content = f'''
 from manim import *
 import sys
 import os
+import re
 
 class FinancialHelpScene(Scene):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.text_content = """{text_content}"""
     
-    def construct(self):
-        # Create title
-        title = Text("Financial Help", font_size=48, color=BLUE)
-        title.to_edge(UP)
+    def chunk_text(self, text, max_chars_per_chunk=150):
+        """Split text into logical chunks based on sentences and length"""
+        # Split by sentences first
+        sentences = re.split(r'(?<=[.!?])\\s+', text)
+        chunks = []
+        current_chunk = ""
         
-        # Create the main text content
-        main_text = Text(
-            self.text_content,
-            font_size=24,
-            color=WHITE,
-            line_spacing=1.2
-        )
+        for sentence in sentences:
+            # If adding this sentence would exceed max length, start new chunk
+            if len(current_chunk + " " + sentence) > max_chars_per_chunk and current_chunk:
+                chunks.append(current_chunk.strip())
+                current_chunk = sentence
+            else:
+                current_chunk += " " + sentence if current_chunk else sentence
         
-        # Split long text into multiple lines if needed
-        if len(self.text_content) > 100:
-            words = self.text_content.split()
-            lines = []
-            current_line = ""
-            
-            for word in words:
-                if len(current_line + " " + word) <= 50:
-                    current_line += " " + word if current_line else word
-                else:
+        # Add the last chunk if it exists
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+        
+        return chunks
+    
+    def create_grid_text_chunks(self, text, max_width=35, max_lines_per_chunk=3):
+        """Create multiple text chunks that fit within grid cells with proper line wrapping"""
+        words = text.split()
+        lines = []
+        current_line = ""
+        
+        # First, create all lines
+        for word in words:
+            if len(current_line + " " + word) <= max_width:
+                current_line += " " + word if current_line else word
+            else:
+                if current_line:
                     lines.append(current_line)
-                    current_line = word
-            
-            if current_line:
-                lines.append(current_line)
-            
-            main_text = VGroup(*[Text(line, font_size=24, color=WHITE) for line in lines])
-            main_text.arrange(DOWN, aligned_edge=LEFT, buff=0.3)
+                current_line = word
         
-        # Center the text
-        main_text.move_to(ORIGIN)
+        if current_line:
+            lines.append(current_line)
         
-        # Animation sequence
+        # Now split lines into chunks of max_lines_per_chunk
+        chunks = []
+        for i in range(0, len(lines), max_lines_per_chunk):
+            chunk_lines = lines[i:i + max_lines_per_chunk]
+            chunks.append(chunk_lines)
+        
+        return chunks
+    
+    def construct(self):
+        # Define the layout grid (like CSS Grid)
+        # Top area: 20% (for title/header)
+        # Middle area: 60% (for content)
+        # Bottom area: 20% (for footer/spacing)
+        
+        title_y = 3    # Top area
+        content_y = 0  # Middle area (center)
+        footer_y = -3  # Bottom area
+        
+        # Create persistent title
+        title = Text("Financial Help", font_size=40, color=BLUE, weight=BOLD)
+        title.move_to([0, title_y, 0])
+        
+        # Split content into logical chunks
+        content_chunks = self.chunk_text(self.text_content)
+        
+        # Scene 1: Title Introduction
         self.play(Write(title), run_time=1.5)
-        self.wait(0.5)
+        self.wait(1)
         
-        self.play(FadeIn(main_text), run_time=2)
-        self.wait(3)
+        # Process each chunk as separate "grid cells" - create as many scenes as needed
+        scene_count = 0
         
-        # Highlight important parts (if any numbers or key terms)
-        if any(char.isdigit() for char in self.text_content):
-            highlight_box = SurroundingRectangle(main_text, color=YELLOW, buff=0.1)
-            self.play(Create(highlight_box), run_time=1)
-            self.wait(1)
-            self.play(FadeOut(highlight_box), run_time=0.5)
+        for chunk_text in content_chunks:
+            # Create multiple sub-chunks from this text to ensure ALL content is shown
+            text_sub_chunks = self.create_grid_text_chunks(chunk_text, max_width=35, max_lines_per_chunk=3)
+            
+            for sub_chunk_lines in text_sub_chunks:
+                scene_count += 1
+                
+                # Create text objects for each line with smaller font
+                text_objects = []
+                for line in sub_chunk_lines:
+                    if line.strip():  # Only add non-empty lines
+                        text_obj = Text(line.strip(), font_size=24, color=WHITE)
+                        text_objects.append(text_obj)
+                
+                # Skip if no valid text objects
+                if not text_objects:
+                    continue
+                    
+                # Arrange lines vertically in the content area
+                content_group = VGroup(*text_objects)
+                content_group.arrange(DOWN, buff=0.2, center=True)
+                content_group.move_to([0, content_y, 0])
+                
+                # Ensure content fits within the middle area bounds
+                if content_group.height > 3.5:  # Stricter height limit
+                    scale_factor = 3.5 / content_group.height
+                    content_group.scale(scale_factor)
+                    content_group.move_to([0, content_y, 0])
+                
+                # Create a subtle background for this content chunk
+                bg_rect = RoundedRectangle(
+                    width=content_group.width + 1,
+                    height=content_group.height + 0.8,
+                    corner_radius=0.2,
+                    color=DARK_GRAY,
+                    fill_opacity=0.1,
+                    stroke_opacity=0.3
+                )
+                bg_rect.move_to(content_group.get_center())
+                
+                # Add objects to scene and animate
+                self.add(bg_rect, content_group)
+                self.play(
+                    FadeIn(bg_rect),
+                    FadeIn(content_group),
+                    run_time=1.5
+                )
+                
+                self.wait(3)  # Display time for each chunk
+                
+                # Remove objects from scene before next chunk
+                self.play(
+                    FadeOut(bg_rect),
+                    FadeOut(content_group),
+                    run_time=0.8
+                )
+                self.remove(bg_rect, content_group)  # Explicitly remove from scene
         
+        # Final scene: Summary or call-to-action
+        summary_text = Text(
+            "Need more help? Ask another question!",
+            font_size=24,
+            color=YELLOW,
+            slant=ITALIC
+        )
+        summary_text.move_to([0, footer_y, 0])
+        
+        self.play(FadeIn(summary_text), run_time=1.5)
         self.wait(2)
         
-        # Fade out
-        self.play(FadeOut(title), FadeOut(main_text), run_time=1.5)
+        # Final fade out
+        self.play(
+            FadeOut(title),
+            FadeOut(summary_text),
+            run_time=1.5
+        )
+        self.wait(0.5)
 '''
     
     # Write scene file
