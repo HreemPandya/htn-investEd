@@ -19,7 +19,7 @@ const RecommendationsScreen = ({ onNext, onBack }: RecommendationsScreenProps) =
   }
 
   const plans = [
-    { id: "starter", name: "Starter Saver", amount: 50, badge: "SAFE", color: "#005daa" },
+    { id: "starter", name: "Starter Saver", amount: 50, badge: "SAFE", color: "#23231a" },
     { id: "balanced", name: "Balanced Builder", amount: 150, badge: "RECOMMENDED", color: "#ffd200" },
     { id: "accelerated", name: "Goal Accelerator", amount: 300, badge: "AMBITIOUS", color: "#23231a" },
   ]
@@ -86,19 +86,19 @@ const RecommendationsScreen = ({ onNext, onBack }: RecommendationsScreenProps) =
           <p className="text-sm" style={{ color: "#91918d" }}>Spent</p>
         </div>
         <div className="bg-white rounded-xl shadow p-4 text-center">
-          <div className="text-xl font-bold" style={{ color: "#10B981" }}>
+          <div className="text-xl font-bold" style={{ color: "#005daa" }}>
             {spendingData.savingsRate * 100}%
           </div>
           <p className="text-sm" style={{ color: "#91918d" }}>Savings</p>
         </div>
         <div className="bg-white rounded-xl shadow p-4 text-center">
-          <div className="text-xl font-bold" style={{ color: "#F59E0B" }}>
+          <div className="text-xl font-bold" style={{ color: "#005daa" }}>
             ${spendingData.available}
           </div>
           <p className="text-sm" style={{ color: "#91918d" }}>Available</p>
         </div>
         <div className="bg-white rounded-xl shadow p-4 text-center">
-          <div className="text-xl font-bold capitalize" style={{ color: "#8B5CF6" }}>
+          <div className="text-xl font-bold capitalize" style={{ color: "#005daa" }}>
             {spendingData.riskProfile}
           </div>
           <p className="text-sm" style={{ color: "#91918d" }}>Risk</p>

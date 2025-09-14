@@ -129,12 +129,6 @@ const PersonalizationScreen = ({ userData, onNext, onBack }: PersonalizationScre
 
       {/* Main Content */}
       <div className="flex-1 px-6 pb-6 space-y-8">
-        <h2 className="text-2xl font-bold text-[#23231A]">
-          {userData.hasRBCAccount
-            ? `Nice to meet you, ${userData.name}!`
-            : "Let’s get acquainted!"}
-        </h2>
-        <p className="text-gray-500">Tell us about your academic journey</p>
 
         {/* Form Section */}
         <div className="space-y-6">
