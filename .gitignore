@@ -1,5 +1,7 @@
-ai-video-backend/.env
-backend/videos/
-node_modules
-.venv
+# Environment variables - NEVER commit these!
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*
