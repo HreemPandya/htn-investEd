@@ -1,116 +1,151 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect } from "react";
 
 interface VideoChatbotProps {
-  videoUrl?: string
-  videoScript?: string
-  onClose: () => void
+  videoUrl?: string;
+  videoScript?: string;
+  onClose: () => void;
 }
 
 interface ChatMessage {
-  id: string
-  type: 'user' | 'bot'
-  content: string
-  timestamp: Date
+  id: string;
+  type: "user" | "bot";
+  content: string;
+  timestamp: Date;
 }
 
-const VideoChatbot = ({ videoUrl, videoScript, onClose }: VideoChatbotProps) => {
+const VideoChatbot = ({
+  videoUrl,
+  videoScript,
+  onClose,
+}: VideoChatbotProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: '1',
-      type: 'bot',
-      content: videoScript 
-        ? `I just created a video about: "${videoScript.substring(0, 100)}..." What would you like to know about this topic?`
+      id: "1",
+      type: "bot",
+      content: videoScript
+        ? `I just created a video about: "${videoScript.substring(
+            0,
+            100
+          )}..." What would you like to know about this topic?`
         : "Hi! I'm here to help you understand the video content. What questions do you have?",
-      timestamp: new Date()
-    }
-  ])
-  const [inputMessage, setInputMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+      timestamp: new Date(),
+    },
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   const generateBotResponse = async (userMessage: string): Promise<string> => {
     try {
       // Call the backend API to get Cohere response
-      const response = await fetch('/api/chat', {
-        method: 'POST',
+      const response = await fetch("/api/chat", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message: userMessage,
           videoScript: videoScript,
-          context: 'investment_education'
-        })
-      })
+          context: "investment_education",
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to get response from chatbot')
+        throw new Error("Failed to get response from chatbot");
       }
 
-      const data = await response.json()
-      return data.response || "I'm sorry, I couldn't generate a response right now. Please try again."
+      const data = await response.json();
+      return (
+        data.response ||
+        "I'm sorry, I couldn't generate a response right now. Please try again."
+      );
     } catch (error) {
-      console.error('Error calling chatbot API:', error)
-      return "I'm having trouble connecting to the AI service. Please try again in a moment."
+      console.error("Error calling chatbot API:", error);
+
+      // Provide helpful fallback responses based on the question
+      const lowerMessage = userMessage.toLowerCase();
+
+      if (
+        lowerMessage.includes("invest") ||
+        lowerMessage.includes("stock") ||
+        lowerMessage.includes("market")
+      ) {
+        return "Investing is like planting seeds for your financial future! Start with index funds or ETFs - they're like buying a little piece of many companies at once. The key is to start early and stay consistent! 🌱";
+      }
+
+      if (lowerMessage.includes("save") || lowerMessage.includes("budget")) {
+        return "Saving money is your financial foundation! Try the 50/30/20 rule: 50% for needs, 30% for wants, and 20% for savings and investing. Every dollar saved today is worth more tomorrow! 💰";
+      }
+
+      if (lowerMessage.includes("tfsa") || lowerMessage.includes("rrsp")) {
+        return "TFSA and RRSP are amazing tax-advantaged accounts! TFSA is like a magic box where your money grows tax-free. RRSP gives you tax breaks now but you pay taxes when you withdraw. Both are powerful tools for building wealth! 🏦";
+      }
+
+      if (lowerMessage.includes("diversif") || lowerMessage.includes("risk")) {
+        return "Diversification is like not putting all your eggs in one basket! Spread your investments across different companies, industries, and even countries. This helps reduce risk while still growing your money over time! 🥚";
+      }
+
+      return "I'm having trouble connecting right now, but I'm here to help with your financial questions! Feel free to ask about investing, saving, budgeting, or any financial topic that interests you! 💡";
     }
-  }
+  };
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return
+    if (!inputMessage.trim()) return;
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      type: 'user',
+      type: "user",
       content: inputMessage,
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    };
 
-    setMessages(prev => [...prev, userMessage])
-    setInputMessage("")
-    setIsTyping(true)
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
+    setIsTyping(true);
 
     try {
       // Get AI response from Cohere
-      const botResponseText = await generateBotResponse(inputMessage)
-      
+      const botResponseText = await generateBotResponse(inputMessage);
+
       const botResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        type: 'bot',
+        type: "bot",
         content: botResponseText,
-        timestamp: new Date()
-      }
-      
-      setMessages(prev => [...prev, botResponse])
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, botResponse]);
     } catch (error) {
-      console.error('Error generating bot response:', error)
+      console.error("Error generating bot response:", error);
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        type: 'bot',
-        content: "I'm sorry, I'm having trouble responding right now. Please try again.",
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, errorResponse])
+        type: "bot",
+        content:
+          "I'm sorry, I'm having trouble responding right now. Please try again.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorResponse]);
     } finally {
-      setIsTyping(false)
+      setIsTyping(false);
     }
-  }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
-  }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -118,17 +153,17 @@ const VideoChatbot = ({ videoUrl, videoScript, onClose }: VideoChatbotProps) => 
         {/* Header */}
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-bold" style={{ color: '#23231A' }}>
+            <h2 className="text-xl font-bold" style={{ color: "#23231A" }}>
               Video Assistant
             </h2>
-            <p className="text-sm" style={{ color: '#91918D' }}>
+            <p className="text-sm" style={{ color: "#91918D" }}>
               Ask questions about the video content
             </p>
           </div>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
-            style={{ color: '#91918D' }}
+            style={{ color: "#91918D" }}
           >
             ✕
           </button>
@@ -138,10 +173,10 @@ const VideoChatbot = ({ videoUrl, videoScript, onClose }: VideoChatbotProps) => 
         {videoUrl && (
           <div className="p-4 border-b border-gray-200">
             <div className="bg-gray-50 rounded-xl p-3">
-              <video 
-                controls 
+              <video
+                controls
                 className="w-full max-w-sm mx-auto rounded-lg"
-                style={{ backgroundColor: '#F3F4F6' }}
+                style={{ backgroundColor: "#F3F4F6" }}
               >
                 <source src={videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -155,24 +190,25 @@ const VideoChatbot = ({ videoUrl, videoScript, onClose }: VideoChatbotProps) => 
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${
+                message.type === "user" ? "justify-end" : "justify-start"
+              }`}
             >
               <div
                 className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
-                  message.type === 'user'
-                    ? 'rounded-br-sm'
-                    : 'rounded-bl-sm'
+                  message.type === "user" ? "rounded-br-sm" : "rounded-bl-sm"
                 }`}
                 style={{
-                  backgroundColor: message.type === 'user' ? '#005DAA' : '#F3F4F6',
-                  color: message.type === 'user' ? 'white' : '#23231A'
+                  backgroundColor:
+                    message.type === "user" ? "#005DAA" : "#F3F4F6",
+                  color: message.type === "user" ? "white" : "#23231A",
                 }}
               >
                 <p className="text-sm">{message.content}</p>
-                <p 
+                <p
                   className="text-xs mt-1 opacity-70"
-                  style={{ 
-                    color: message.type === 'user' ? 'white' : '#91918D' 
+                  style={{
+                    color: message.type === "user" ? "white" : "#91918D",
                   }}
                 >
                   {message.timestamp.toLocaleTimeString()}
@@ -180,22 +216,28 @@ const VideoChatbot = ({ videoUrl, videoScript, onClose }: VideoChatbotProps) => 
               </div>
             </div>
           ))}
-          
+
           {isTyping && (
             <div className="flex justify-start">
-              <div 
+              <div
                 className="max-w-xs px-4 py-3 rounded-2xl rounded-bl-sm"
-                style={{ backgroundColor: '#F3F4F6', color: '#23231A' }}
+                style={{ backgroundColor: "#F3F4F6", color: "#23231A" }}
               >
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
                 </div>
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 
@@ -209,21 +251,22 @@ const VideoChatbot = ({ videoUrl, videoScript, onClose }: VideoChatbotProps) => 
               onKeyPress={handleKeyPress}
               placeholder="Ask a question about the video..."
               className="flex-1 px-4 py-3 rounded-xl border-2 transition-colors focus:outline-none"
-              style={{ 
-                backgroundColor: '#F9FAFB',
-                borderColor: '#E5E7EB',
-                color: '#23231A'
+              style={{
+                backgroundColor: "#F9FAFB",
+                borderColor: "#E5E7EB",
+                color: "#23231A",
               }}
             />
             <button
               onClick={handleSendMessage}
               disabled={!inputMessage.trim()}
               className="px-6 py-3 font-semibold rounded-xl transition-colors disabled:opacity-50"
-              style={{ 
-                backgroundColor: '#005DAA',
-                color: 'white',
-                border: 'none',
-                fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              style={{
+                backgroundColor: "#005DAA",
+                color: "white",
+                border: "none",
+                fontFamily:
+                  'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
               }}
             >
               Send
@@ -232,7 +275,7 @@ const VideoChatbot = ({ videoUrl, videoScript, onClose }: VideoChatbotProps) => 
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VideoChatbot
+export default VideoChatbot;
