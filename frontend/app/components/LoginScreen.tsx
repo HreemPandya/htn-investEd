@@ -72,7 +72,7 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
             onClick={handleSignIn} 
             className="w-full h-16 rounded-2xl font-semibold text-xl"
             style={{ 
-              backgroundColor: '#91918D',
+              backgroundColor: '#FFDBAC',
               color: '#23231A',
               border: 'none',
               fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
