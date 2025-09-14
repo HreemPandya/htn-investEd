@@ -346,11 +346,6 @@ const InsightsDashboard = ({ userData, onNext }: InsightsDashboardProps) => {
     <div className="min-h-screen bg-white">
         {/* Header */}
       <div className="p-6 flex justify-center items-center">
-        <img 
-          src="/images/investEd-logo.png" 
-          alt="InvestEd Logo"
-          className="h-24 w-auto object-contain"
-        />
       </div>
 
       <div className="px-6 pb-8">
