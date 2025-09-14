@@ -5,3 +5,4 @@ cohere
 python-dotenv
 manim
 uuid
+elevenlabs==0.2.26

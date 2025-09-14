@@ -19,6 +19,7 @@ class QuestionResponse(BaseModel):
     question: str
     job_id: str
     video_url: str = None
+    voiceover_url: str = None
 
 @router.post("/", response_model=QuestionResponse)
 async def get_financial_help(request: QuestionRequest, background_tasks: BackgroundTasks):
@@ -64,7 +65,8 @@ Answer:"""
             question=request.question,
             answer=answer,
             job_id=job_id,
-            video_url=f"/videos/{job_id}/video.mp4"  # This will be available once video is generated
+            video_url=f"/videos/{job_id}/video.mp4",  # This will be available once video is generated
+            voiceover_url=f"/videos/{job_id}/voiceover.mp3"  # This will be available once voiceover is generated
         )
         
     except Exception as e:
@@ -76,21 +78,30 @@ async def get_video_status(job_id: str):
     import os
     from pathlib import Path
     
-    video_dir = Path(f"/Users/aymanfouad/Desktop/htnv2/htn-investEd/backend/videos/{job_id}")
+    video_dir = Path(f"C:/Users/hreem/htn-investEd/backend/videos/{job_id}")
     
     if not video_dir.exists():
         return {"status": "not_found", "message": "Job ID not found"}
     
     # Look for video files
     video_files = list(video_dir.glob("**/*.mp4"))
+    voiceover_files = list(video_dir.glob("**/*.mp3"))
     
     if video_files:
         video_path = video_files[0]
-        return {
+        response = {
             "status": "ready",
             "video_url": f"/videos/{job_id}/{video_path.name}",
             "file_size": video_path.stat().st_size
         }
+        
+        # Add voiceover info if available
+        if voiceover_files:
+            voiceover_path = voiceover_files[0]
+            response["voiceover_url"] = f"/videos/{job_id}/{voiceover_path.name}"
+            response["voiceover_size"] = voiceover_path.stat().st_size
+        
+        return response
     else:
         return {"status": "processing", "message": "Video is still being generated"}
 
