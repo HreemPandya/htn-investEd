@@ -93,8 +93,8 @@ const VideoTestPage = ({ userData, onNext }: VideoTestPageProps) => {
     const mappedVideo = getVideoForPrompt(testPrompt);
 
     if (mappedVideo) {
-      addLog(`🎯 Found mapped video: ${mappedVideo}`);
-      addLog(`⏳ Simulating generation delay...`);
+      addLog(`🎯 Researching about the topic: ${mappedVideo}`);
+      addLog(`⏳ Generating visuals delay...`);
 
       // Simulate generation process with delays
       setTimeout(() => {
