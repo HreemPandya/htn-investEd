@@ -58,10 +58,10 @@ InvestEd helps close that gap.
 
 ## 📸 Screenshots / Demo
  ![Logo](/frontend/public/images/InvestEd_Wide_logo.png)
- ![Logo](/frontend/public/images/InvestedLogIn.jpg)
- ![Logo](/frontend/public/images/DreamLaptop.png.png)
- ![Logo](/frontend/public/images/InvestedHomePage.jpg.png)
- ![Logo](/frontend/public/images/FunFacts.pngpng)
+ ![LoginPage](/frontend/public/images/InvestedLogIn.jpg)
+ ![Insights on Goal](/frontend/public/images/DreamLaptop.png)
+ ![HomePage](/frontend/public/images/InvestedHomePage.jpg)
+ ![Facts](/frontend/public/images/FunFacts.png)
 
 
 
