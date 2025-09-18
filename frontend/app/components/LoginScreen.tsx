@@ -23,78 +23,75 @@ export default function LoginScreen({ onNext }: LoginScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
-      <div className="p-6 flex justify-center items-center">
-        <img 
-          src="/images/investEd-logo.png" 
-          alt="InvestEd Logo"
-          className="h-24 w-auto object-contain"
-        />
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 py-12">
+      {/* Header / Logo */}
+      <div className="p-8 flex justify-center items-center">
+      <h1
+        className="text-5xl md:text-5xl font-bold font-poppins"
+        style={{ color: "#23231A" }}
+      >
+        InvestEd
+      </h1>
+      </div>
+
+      {/* Tagline */}
+      <div className="text-center px-6 pb-8">
+        <span className="text-lg md:text-2xl font-large text-gray-700">
+          From saving cents to achieving milestones...
+        </span>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-8">
-        {/* Wizard Character */}
-        <div className="text-center mb-8">
-          {/* Speech Bubble */}
-          <div className="relative mb-6">
-            <div 
-              className="rounded-3xl p-6 mx-auto max-w-sm relative"
-              style={{ backgroundColor: '#FFDBAC' }}
+      <div className="flex flex-col items-center justify-center px-6 w-full">
+        <div className="w-full max-w-md p-8 shadow-xl border-0 bg-white/80 backdrop-blur-sm rounded-3xl transition-all duration-300">
+          <div className="space-y-6">
+            {/* Email Login */}
+            <Button
+              onClick={handleSignIn}
+              className="w-full h-16 rounded-2xl font-semibold text-xl"
+              style={{
+                backgroundColor: "#ffd200",
+                color: "#23231A",
+                border: "none",
+                fontFamily:
+                  'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                letterSpacing: "0.5px",
+              }}
             >
-              <p className="text-lg font-semibold" style={{ color: '#23231A' }}>
-                Hi user! Let's get you in!
-              </p>
-              {/* Speech bubble tail */}
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
-                <div 
-                  className="w-6 h-6 transform rotate-45"
-                  style={{ backgroundColor: '#FFDBAC' }}
+              Login with Email
+            </Button>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span
+                  className="w-full border-t"
+                  style={{ borderColor: "#91918d" }}
                 />
               </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2" style={{ color: "#91918d" }}>
+                  Or continue with
+                </span>
+              </div>
             </div>
+
+            {/* RBC Login */}
+            <Button
+              onClick={handleRBCLogin}
+              className="w-full h-16 rounded-2xl font-semibold text-xl"
+              style={{
+                backgroundColor: "#005DAA",
+                color: "white",
+                border: "none",
+                fontFamily:
+                  'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                letterSpacing: "0.5px",
+              }}
+            >
+              Connect with RBC
+            </Button>
           </div>
-
-          {/* Wizard Image - Made HUGE */}
-          <div className="w-64 h-64 mx-auto relative">
-            <img 
-              src="/images/wizard-charcter.png" 
-              alt="Portfolius the Wizard"
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
-
-        {/* Login Form */}
-        <div className="w-full max-w-sm space-y-5">
-          <Button 
-            onClick={handleSignIn} 
-            className="w-full h-16 rounded-2xl font-semibold text-xl"
-            style={{ 
-              backgroundColor: '#91918D',
-              color: '#23231A',
-              border: 'none',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-              letterSpacing: '0.5px'
-            }}
-          >
-            Login
-          </Button>
-
-          <Button
-            onClick={handleRBCLogin}
-            className="w-full h-16 rounded-2xl font-semibold text-xl"
-            style={{ 
-              backgroundColor: '#005DAA',
-              color: 'white',
-              border: 'none',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-              letterSpacing: '0.5px'
-            }}
-          >
-            Connect With RBC
-          </Button>
         </div>
       </div>
     </div>

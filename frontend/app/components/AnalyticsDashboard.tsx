@@ -37,11 +37,6 @@ export default function AnalyticsDashboard({ userData, onNext }: AnalyticsDashbo
             ← Back
           </button>
         )}
-        <img 
-          src="/images/investEd-logo.png" 
-          alt="InvestEd Logo"
-          className="h-24 w-auto object-contain"
-        />
         <div className="w-24"></div> {/* Spacer for centering */}
       </div>
 

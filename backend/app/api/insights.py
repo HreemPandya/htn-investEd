@@ -9,8 +9,8 @@ from app.utils.schemas import Transaction
 from app.models.classifier import classify
 from app.models import Insight  # make sure you have an Insight model with video_url + job_id
 
-# Push notifications
-from app.core.notifications import send_push_notification  # assumes you created this already
+# Push notifications - commented out for now
+# from app.core.notifications import send_push_notification  # assumes you created this already
 
 router = APIRouter()
 
@@ -113,18 +113,18 @@ async def run_monthly(user_id: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_insight)
 
-    # 5. Send push notification (demo: static token, replace with lookup)
-    clickbaits = [
-        "☕ You spent too much on coffee! Tap to see your story 🎥",
-        "🔥 Your wallet is crying… see how last month went 🚀",
-        "💸 You could’ve bought a MacBook by now. Proof inside 👀"
-    ]
-    fcm_token = "user-device-token"  # TODO: fetch from your Users table
-    send_push_notification(
-        fcm_token,
-        title="Your Money Story is Ready!",
-        body=random.choice(clickbaits),
-        url=url
-    )
+    # 5. Send push notification (demo: static token, replace with lookup) - commented out for now
+    # clickbaits = [
+    #     "☕ You spent too much on coffee! Tap to see your story 🎥",
+    #     "🔥 Your wallet is crying… see how last month went 🚀",
+    #     "💸 You could've bought a MacBook by now. Proof inside 👀"
+    # ]
+    # fcm_token = "user-device-token"  # TODO: fetch from your Users table
+    # send_push_notification(
+    #     fcm_token,
+    #     title="Your Money Story is Ready!",
+    #     body=random.choice(clickbaits),
+    #     url=url
+    # )
 
     return {"status": "success", "video_url": url, "job_id": job_id}

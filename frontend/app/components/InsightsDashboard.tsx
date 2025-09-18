@@ -108,8 +108,11 @@ const InsightsDashboard = ({ userData, onNext }: InsightsDashboardProps) => {
                     <span className="font-semibold text-xl" style={{ color: '#23231A' }}>{goal.name}</span>
                   </div>
                   <span className="text-lg font-medium" style={{ color: '#005DAA' }}>
-                    ${Math.round((goal.suggestedAmount * progress) / 100).toLocaleString()} / $
-                    {goal.suggestedAmount.toLocaleString()}
+                    <span className="text-lg font-medium" style={{ color: '#005DAA' }}>
+                      ${Math.round(((goal.suggestedAmount ?? 0) * progress) / 100).toLocaleString()} / $
+                      {(goal.suggestedAmount ?? 0).toLocaleString()}
+                    </span>
+
                   </span>
                 </div>
 
@@ -156,6 +159,32 @@ const InsightsDashboard = ({ userData, onNext }: InsightsDashboardProps) => {
           </div>
           <div className="text-lg mb-2" style={{ color: '#23231A' }}>Savings Rate</div>
           <div className="text-base" style={{ color: '#10B981' }}>Above average</div>
+        </div>
+      </div>
+
+      {/* Video Generation Section */}
+      <div className="rounded-2xl p-8 shadow-sm bg-white mb-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4" style={{ color: '#23231A' }}>
+            Get Personalized Investment Advice
+          </h2>
+          <p className="text-lg mb-6" style={{ color: '#91918D' }}>
+            Generate a custom video explaining your spending patterns and investment opportunities
+          </p>
+          {onNext && (
+            <button
+              onClick={() => onNext("video-test")}
+              className="px-8 py-4 font-semibold text-lg rounded-2xl transition-colors"
+              style={{
+                backgroundColor: '#005DAA',
+                color: 'white',
+                border: 'none',
+                fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              }}
+            >
+              🎬 Generate Investment Video
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -317,11 +346,6 @@ const InsightsDashboard = ({ userData, onNext }: InsightsDashboardProps) => {
     <div className="min-h-screen bg-white">
         {/* Header */}
       <div className="p-6 flex justify-center items-center">
-        <img 
-          src="/images/investEd-logo.png" 
-          alt="InvestEd Logo"
-          className="h-24 w-auto object-contain"
-        />
       </div>
 
       <div className="px-6 pb-8">
@@ -330,13 +354,22 @@ const InsightsDashboard = ({ userData, onNext }: InsightsDashboardProps) => {
           <div className="rounded-3xl p-8 mb-8 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #005DAA 0%, #3B82F6 100%)' }}>
             <div className="absolute top-6 right-6 flex space-x-3">
               {onNext && (
-                <button
-                  onClick={() => onNext("analytics")}
-                  className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors backdrop-blur-sm"
-                  title="View Analytics"
-                >
-                  <span className="text-xl">📈</span>
-                </button>
+                <>
+                  <button
+                    onClick={() => onNext("analytics")}
+                    className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors backdrop-blur-sm"
+                    title="View Analytics"
+                  >
+                    <span className="text-xl">📈</span>
+                  </button>
+                  <button
+                    onClick={() => onNext("video-test")}
+                    className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors backdrop-blur-sm"
+                    title="Video Generation Test"
+                  >
+                    <span className="text-xl">🎬</span>
+                  </button>
+                </>
               )}
               <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                 <span className="text-2xl">🧙‍♂️</span>
