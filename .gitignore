@@ -5,3 +5,16 @@
 .env.test.local
 .env.production.local
 .env*
+<<<<<<< HEAD
+=======
+# env files
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+**/*.env
+frontend/.env.local
+backend/.env
+ai-video-backend/.env
+>>>>>>> feature-backend-rishi

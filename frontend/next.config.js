@@ -1,9 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    BACKEND_URL: process.env.BACKEND_URL || "http://localhost:8000",
+  },
   async rewrites() {
     return [
-      { source: "/api/videos", destination: "http://localhost:8000/videos" },
-      { source: "/api/videos/:id", destination: "http://localhost:8000/videos/:id" },
+      // Proxy video files directly to backend
+      {
+        source: "/videos/:path*",
+        destination: "http://localhost:8000/videos/:path*",
+      },
+      // Keep other API routes
       { source: "/api/chat", destination: "http://localhost:8000/chat" },
     ];
   },
